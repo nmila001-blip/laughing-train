@@ -1,212 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>SafeWatch AI</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0b0f14;
-      color: white;
-      text-align: center;
-    }
-
-    /* LOGIN */
-    #loginScreen {
-      position: fixed;
-      inset: 0;
-      background: #0b0f14;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .box {
-      width: 320px;
-      background: #151b22;
-      padding: 20px;
-      border-radius: 12px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 6px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #00c853;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    /* APP */
-    #app {
-      display: none;
-      padding: 20px;
-    }
-
-    video {
-      width: 320px;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-
-    #result {
-      margin-top: 10px;
-      padding: 10px;
-      background: #151b22;
-      border-radius: 8px;
-      display: inline-block;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comprehensive Science Quiz</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+}
+.question {
+  margin-bottom: 20px;
+}
+.options button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #e9ecef;
+}
+.options button:hover {
+  background: #d0d7de;
+}
+#nextBtn {
+  margin-top: 20px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+}
+#score {
+  font-size: 20px;
+  text-align: center;
+  margin-top: 20px;
+}
+</style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="box">
-    <h2>SafeWatch Login</h2>
-
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button onclick="login()">Login</button>
-
-    <p style="font-size:12px;opacity:0.7;">
-      Demo login: anything works
-    </p>
-  </div>
+<div class="container">
+  <h1>Science Quiz</h1>
+  <div id="quiz"></div>
+  <button id="nextBtn">Next</button>
+  <div id="score"></div>
 </div>
-
-<!-- APP -->
-<div id="app">
-
-  <h2>SafeWatch Bullying Detector</h2>
-
-  <video id="webcam" autoplay playsinline></video>
-
-  <button onclick="startCamera()">Start Camera</button>
-  <button onclick="logout()" style="background:red;">Logout</button>
-
-  <div id="result">Waiting...</div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
 <script>
+const questions = [
+  {q:"What is an ecosystem?", a:["Only plants","Living and nonliving things interacting","Only animals","Weather system"], c:1},
+  {q:"What is a producer?", a:["Eats others","Makes its own food","Breaks down dead matter","Moves energy"], c:1},
+  {q:"Function of decomposers?", a:["Make food","Break down dead organisms","Hunt","Photosynthesis"], c:1},
+  {q:"What is classification?", a:["Studying rocks","Grouping organisms","Weather study","Cells only"], c:1},
+  {q:"Correct classification order?", a:["Species to Kingdom","Kingdom to Species","Class to Domain","Order to Species"], c:1},
+  {q:"Darwin is known for?", a:["Cell theory","Evolution by natural selection","Gravity","Atoms"], c:1},
+  {q:"Natural selection means?", a:["Humans choose traits","Best traits survive","All survive","Random survival"], c:1},
+  {q:"What is a pathogen?", a:["Helpful bacteria","Disease-causing organism","Plant cell","Virus protector"], c:1},
+  {q:"Immune system function?", a:["Digestion","Fight disease","Move muscles","Make bones"], c:1},
+  {q:"Skeletal system does what?", a:["Protect/support","Digests food","Pumps blood","Controls hormones"], c:0}
+];
 
-/* ---------------- LOGIN ---------------- */
-function login() {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
+let current = 0;
+let score = 0;
 
-  if (!email || !pass) return;
+const quizDiv = document.getElementById("quiz");
+const nextBtn = document.getElementById("nextBtn");
+const scoreDiv = document.getElementById("score");
 
-  localStorage.setItem("loggedIn", "true");
-  unlock();
-}
-
-function logout() {
-  localStorage.clear();
-  location.reload();
-}
-
-function checkLogin() {
-  if (localStorage.getItem("loggedIn") === "true") {
-    unlock();
+function loadQuestion() {
+  if (current >= questions.length) {
+    quizDiv.innerHTML = "";
+    nextBtn.style.display = "none";
+    scoreDiv.innerHTML = `You scored ${score} / ${questions.length}`;
+    return;
   }
+
+  const q = questions[current];
+  quizDiv.innerHTML = `<div class='question'><h3>${q.q}</h3>
+  <div class='options'>
+    ${q.a.map((opt,i)=>`<button onclick='select(${i})'>${opt}</button>`).join('')}
+  </div></div>`;
 }
 
-function unlock() {
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "block";
+window.select = function(i){
+  if(i === questions[current].c) score++;
+  current++;
+  loadQuestion();
 }
 
-/* ---------------- MODEL ---------------- */
-
-let model;
-let webcam;
-let busy = false;
-
-// 🔥 YOUR MODEL LINK
-const URL = "https://nmila001-blip.github.io/laughing-train/";
-
-async function loadModel() {
-  try {
-    model = await tmImage.load(
-      URL + "model.json",
-      URL + "metadata.json"
-    );
-    console.log("Model loaded");
-  } catch (e) {
-    console.error(e);
-    alert("Model failed to load");
-  }
+nextBtn.onclick = () => {
+  current++;
+  loadQuestion();
 }
 
-async function startCamera() {
-  if (!model) await loadModel();
-
-  webcam = new tmImage.Webcam(320, 240, true);
-  await webcam.setup();
-  await webcam.play();
-
-  document.getElementById("webcam").srcObject = webcam.webcam;
-
-  loop();
-}
-
-async function loop() {
-  webcam.update();
-  await predict();
-  requestAnimationFrame(loop);
-}
-
-async function predict() {
-  if (busy || !model) return;
-  busy = true;
-
-  try {
-    const prediction = await model.predict(webcam.canvas);
-
-    if (!Array.isArray(prediction)) return;
-
-    let best = prediction.reduce((a, b) =>
-      a.probability > b.probability ? a : b
-    );
-
-    const result = document.getElementById("result");
-
-    if (best.className.toLowerCase().includes("bully")) {
-      result.innerHTML = "🚨 Bullying Detected";
-      result.style.color = "red";
-    } else {
-      result.innerHTML = "✅ Safe";
-      result.style.color = "lime";
-    }
-
-  } catch (err) {
-    console.log(err);
-  } finally {
-    busy = false;
-  }
-}
-
-/* INIT */
-checkLogin();
-
+loadQuestion();
 </script>
 
 </body>
