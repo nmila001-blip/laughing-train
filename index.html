@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Demo App (Login Protected)</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0b0f14;
+      color: white;
+    }
+
+    /* LOGIN SCREEN */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      background: #0b0f14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loginBox {
+      width: 320px;
+      background: #151b22;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #00c853;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* MAIN APP */
+    #app {
+      display: none;
+      padding: 20px;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      padding: 10px 16px;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="loginBox">
+    <h2>Login Demo</h2>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+    <p style="font-size:12px;opacity:0.7;margin-top:10px;">
+      Demo: anything works
+    </p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <h1>Welcome to the App</h1>
+  <p id="userInfo"></p>
+
+  <button onclick="logout()" style="background:red;margin-top:10px;">
+    Logout
+  </button>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ---------------------------
+   TOAST SYSTEM
+----------------------------*/
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.innerText = msg;
+  toast.style.display = "block";
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 2000);
+}
+
+/* ---------------------------
+   LOGIN SYSTEM (FRONTEND ONLY)
+----------------------------*/
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    showToast("Enter email + password");
+    return;
+  }
+
+  // fake login (DEMO ONLY)
+  localStorage.setItem("loggedIn", "true");
+  localStorage.setItem("userEmail", email);
+
+  unlockApp();
+  showToast("Logged in");
+}
+
+function logout() {
+  localStorage.removeItem("loggedIn");
+  localStorage.removeItem("userEmail");
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+
+  showToast("Logged out");
+}
+
+function checkLogin() {
+  const loggedIn = localStorage.getItem("loggedIn");
+
+  if (loggedIn === "true") {
+    unlockApp();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
+}
+
+function unlockApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  const email = localStorage.getItem("userEmail");
+  document.getElementById("userInfo").innerText =
+    "Logged in as: " + email;
+}
+
+/* INIT */
+checkLogin();
+</script>
+
+</body>
+</html>
