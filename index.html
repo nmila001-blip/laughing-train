@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SafeWatch Bullying Detector</title>
+  <title>SafeWatch AI</title>
 
   <style>
     body {
@@ -9,6 +9,7 @@
       font-family: Arial;
       background: #0b0f14;
       color: white;
+      text-align: center;
     }
 
     /* LOGIN */
@@ -29,13 +30,12 @@
       border-radius: 12px;
     }
 
-    input, textarea {
+    input {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
-      border-radius: 6px;
       border: none;
-      outline: none;
+      border-radius: 6px;
     }
 
     button {
@@ -46,6 +46,7 @@
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 8px;
     }
 
     /* APP */
@@ -54,40 +55,28 @@
       padding: 20px;
     }
 
-    .panel {
-      max-width: 600px;
-      margin: auto;
-      background: #151b22;
-      padding: 20px;
-      border-radius: 12px;
+    video {
+      width: 320px;
+      border-radius: 10px;
+      margin-top: 10px;
     }
 
     #result {
       margin-top: 10px;
       padding: 10px;
-      background: #1c2430;
+      background: #151b22;
       border-radius: 8px;
-    }
-
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #222;
-      padding: 10px 16px;
-      border-radius: 8px;
-      display: none;
+      display: inline-block;
     }
   </style>
 </head>
 
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="box">
-    <h2>Login</h2>
+    <h2>SafeWatch Login</h2>
 
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
@@ -102,48 +91,31 @@
 
 <!-- APP -->
 <div id="app">
-  <div class="panel">
-    <h2>Bullying Detector (AI)</h2>
 
-    <textarea id="inputText" rows="5" placeholder="Enter message..."></textarea>
+  <h2>SafeWatch Bullying Detector</h2>
 
-    <button onclick="analyze()">Analyze</button>
+  <video id="webcam" autoplay playsinline></video>
 
-    <div id="result">Result will show here</div>
+  <button onclick="startCamera()">Start Camera</button>
+  <button onclick="logout()" style="background:red;">Logout</button>
 
-    <button onclick="logout()" style="margin-top:10px;background:red;">
-      Logout
-    </button>
-  </div>
+  <div id="result">Waiting...</div>
+
 </div>
 
-<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
 <script>
 
-/* ---------------- TOAST ---------------- */
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 2000);
-}
-
-/* ---------------- LOGIN SYSTEM ---------------- */
+/* ---------------- LOGIN ---------------- */
 function login() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("password").value;
 
-  if (!email || !pass) {
-    showToast("Enter email + password");
-    return;
-  }
+  if (!email || !pass) return;
 
   localStorage.setItem("loggedIn", "true");
-  localStorage.setItem("userEmail", email);
-
   unlock();
-  showToast("Logged in");
 }
 
 function logout() {
@@ -162,50 +134,54 @@ function unlock() {
   document.getElementById("app").style.display = "block";
 }
 
-/* ---------------- TEACHABLE MACHINE ---------------- */
+/* ---------------- MODEL ---------------- */
 
 let model;
-let predicting = false;
+let webcam;
+let busy = false;
 
-// IMPORTANT: replace with your actual model links
+// 🔥 YOUR MODEL LINK
+const URL = "https://nmila001-blip.github.io/laughing-train/";
+
 async function loadModel() {
   try {
     model = await tmImage.load(
-      "model.json",
-      "metadata.json"
+      URL + "model.json",
+      URL + "metadata.json"
     );
     console.log("Model loaded");
   } catch (e) {
     console.error(e);
-    showToast("Model failed to load");
+    alert("Model failed to load");
   }
 }
 
-async function analyze() {
-  if (!model) {
-    showToast("Model not loaded");
-    return;
-  }
+async function startCamera() {
+  if (!model) await loadModel();
 
-  if (predicting) return;
+  webcam = new tmImage.Webcam(320, 240, true);
+  await webcam.setup();
+  await webcam.play();
 
-  const text = document.getElementById("inputText").value;
+  document.getElementById("webcam").srcObject = webcam.webcam;
 
-  if (!text.trim()) {
-    showToast("Enter text");
-    return;
-  }
+  loop();
+}
 
-  predicting = true;
+async function loop() {
+  webcam.update();
+  await predict();
+  requestAnimationFrame(loop);
+}
+
+async function predict() {
+  if (busy || !model) return;
+  busy = true;
 
   try {
-    const prediction = await model.predict(text);
+    const prediction = await model.predict(webcam.canvas);
 
-    // 🔥 FIX #1: prevent .map crash
-    if (!prediction || !Array.isArray(prediction)) {
-      showToast("Bad model response");
-      return;
-    }
+    if (!Array.isArray(prediction)) return;
 
     let best = prediction.reduce((a, b) =>
       a.probability > b.probability ? a : b
@@ -217,27 +193,21 @@ async function analyze() {
       result.innerHTML = "🚨 Bullying Detected";
       result.style.color = "red";
     } else {
-      result.innerHTML = "✅ No Bullying Detected";
+      result.innerHTML = "✅ Safe";
       result.style.color = "lime";
     }
 
   } catch (err) {
-    console.error(err);
-    showToast("Analysis failed");
+    console.log(err);
   } finally {
-    // 🔥 FIX #2: prevents freeze bug
-    predicting = false;
+    busy = false;
   }
 }
 
 /* INIT */
 checkLogin();
-loadModel();
 
 </script>
-
-<!-- Teachable Machine library -->
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
 </body>
 </html>
