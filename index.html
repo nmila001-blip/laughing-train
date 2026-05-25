@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Imaginary Clinic</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Welcome - Imaginary Clinic</title>
 <style>
 *{
   margin:0;
@@ -13,96 +11,70 @@
   box-sizing:border-box;
   font-family:Arial, sans-serif;
 }
-
 body{
   background:#f4f7fb;
   color:#333;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
-
-header{
-  background:#2563eb;
-  color:white;
-  padding:25px;
-  text-align:center;
-}
-
-.book-btn{
-  margin-top:15px;
+.portal-card{
   background:white;
-  color:#2563eb;
-  border:none;
-  padding:12px 20px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.book-btn:hover{
-  background:#dbeafe;
-}
-
-.container{
-  max-width:900px;
-  margin:30px auto;
-  padding:20px;
-}
-
-.card{
-  background:white;
-  padding:25px;
+  padding:40px;
   border-radius:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  margin-bottom:25px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
   text-align:center;
+  max-width:500px;
+  width:100%;
 }
-
-.card h2{
+h1{
   color:#2563eb;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
-
-.card p{
-  margin-bottom:20px;
-  line-height:1.6;
+p{
+  color:#666;
+  margin-bottom:30px;
 }
-
-.go-btn{
-  display:inline-block;
+.choices{
+  display:flex;
+  gap:15px;
+  flex-direction:column;
+}
+.portal-btn{
+  display:block;
+  padding:15px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:bold;
+  font-size:16px;
+  transition:background 0.2s;
+}
+.patient-link{
   background:#2563eb;
   color:white;
-  text-decoration:none;
-  padding:12px 20px;
-  border-radius:10px;
-  font-weight:bold;
 }
-
-.go-btn:hover{
+.patient-link:hover{
   background:#1e40af;
+}
+.owner-link{
+  background:#e5e7eb;
+  color:#374151;
+}
+.owner-link:hover{
+  background:#d1d5db;
 }
 </style>
 </head>
-
 <body>
 
-<header>
+<div class="portal-card">
   <h1>Imaginary Clinic</h1>
-  <p>Book Your Appointment Online</p>
-  <button class="book-btn" onclick="window.location.href='https://YOUR-APPOINTMENT-LINK-HERE.com'">
-    Go to Appointment Page
-  </button>
-</header>
-
-<div class="container">
-  <div class="card">
-    <h2>Appointments</h2>
-    <p>
-      Click below to open our external appointment booking website.
-      You will be redirected to schedule your visit there.
-    </p>
-
-    <a class="go-btn" href="https://YOUR-APPOINTMENT-LINK-HERE.com" target="_blank">
-      Open Appointment Website
-    </a>
+  <p>Please select your portal to continue</p>
+  
+  <div class="choices">
+    <a href="user.html" class="portal-btn patient-link">Patient Booking Portal</a>
+    <a href="owner.html" class="portal-btn owner-link">Owner Dashboard</a>
   </div>
 </div>
 
