@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Owner Dashboard - Imaginary Clinic</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+  color:#333;
+}
+
+header{
+  background:#2563eb;
+  color:white;
+  padding:25px;
+  text-align:center;
+}
+
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  margin-bottom:25px;
+}
+
+h2{
+  color:#2563eb;
+  margin-bottom:15px;
+}
+
+.top-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:15px;
+  justify-content:center;
+}
+
+.btn{
+  border:none;
+  padding:12px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  text-decoration:none;
+  display:inline-block;
+}
+
+.primary{
+  background:#2563eb;
+  color:white;
+}
+
+.primary:hover{
+  background:#1e40af;
+}
+
+.danger{
+  background:#dc2626;
+  color:white;
+  margin-top:10px;
+}
+
+.danger:hover{
+  background:#991b1b;
+}
+
+.logout{
+  background:white;
+  color:#2563eb;
+}
+
+.logout:hover{
+  background:#dbeafe;
+}
+
+.appointment{
+  background:#eff6ff;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  border-left:5px solid #2563eb;
+}
+
+.appointment h3{
+  margin-bottom:8px;
+}
+
+.appointment p{
+  margin:4px 0;
+}
+
+.empty{
+  text-align:center;
+  color:#666;
+  padding:20px 0;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+input{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  min-width:240px;
+}
+
+.note{
+  background:#fef3c7;
+  color:#92400e;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Imaginary Clinic</h1>
+  <p>Owner Appointment Dashboard</p>
+  <div class="top-actions">
+    <a class="btn logout" href="index.html">Back to Website</a>
+    <!-- Clear all button hidden initially until login -->
+    <button class="btn danger" id="clearAllBtn" style="margin-top:0; display:none;">Clear All Appointments</button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Login Screen View -->
+  <div class="card" id="loginCard">
+    <h2>Owner Login</h2>
+    <div class="note">
+      This is a simple front-end dashboard. For real security, use a backend login system.
+    </div>
+
+    <div class="controls">
+      <input type="email" id="ownerEmail" placeholder="Owner Email" />
+      <input type="password" id="ownerPassword" placeholder="Password" />
+      <button class="btn primary" id="loginBtn">Login</button>
+    </div>
+
+    <p id="loginMsg" style="margin-top:12px;color:red;display:none;">Incorrect email or password.</p>
+  </div>
+
+  <!-- Hidden Schedule View (Revealed on Login) -->
+  <div class="card" id="dashboardCard" style="display:none;">
+    <h2>Appointments</h2>
+    <div id="appointmentsList"></div>
+  </div>
+</div>
+
+<script>
+// Dashboard Credentials
+const OWNER_EMAIL = "nmila001@doral.colegia.org";
+const OWNER_PASSWORD = "05222014nm";
+
+// Load bookings saved by the user form
+let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+// Elements
+const loginBtn = document.getElementById("loginBtn");
+const loginMsg = document.getElementById("loginMsg");
+const loginCard = document.getElementById("loginCard");
+const dashboardCard = document.getElementById("dashboardCard");
+const appointmentsList = document.getElementById("appointmentsList");
+const clearAllBtn = document.getElementById("clearAllBtn");
+
+// Handles credential verification 
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("ownerEmail").value.trim();
+  const password = document.getElementById("ownerPassword").value.trim();
+
+  if (email === OWNER_EMAIL && password === OWNER_PASSWORD) {
+    loginMsg.style.display = "none";
+    loginCard.style.display = "none"; // Hide login panel
+    dashboardCard.style.display = "block"; // Show dashboard panel
+    clearAllBtn.style.display = "inline-block"; // Show global controls
+    renderAppointments();
+  } else {
+    loginMsg.style.display = "block";
+    dashboardCard.style.display = "none";
+    clearAllBtn.style.display = "none";
+  }
+});
+
+// Sync data changes back to localStorage
+function saveAppointments() {
+  localStorage.setItem("appointments", JSON.stringify(appointments));
+}
+
+// Read database and build UI list dynamically
+function renderAppointments() {
+  appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+  if (appointments.length === 0) {
+    appointmentsList.innerHTML = '<p class="empty">No appointments yet.</p>';
+    return;
+  }
+
+  appointmentsList.innerHTML = "";
+
+  appointments.forEach((appt, index) => {
+    const div = document.createElement("div");
+    div.className = "appointment";
+    div.innerHTML = `
+      <h3>${appt.name || 'Anonymous Patient'}</h3>
+      <p><strong>Email:</strong> ${appt.email || 'None provided'}</p>
+      <p><strong>Date:</strong> ${appt.date || 'Unscheduled'}</p>
+      <p><strong>Time:</strong> ${appt.time || 'Unscheduled'}</p>
+      <button class="btn danger" onclick="deleteAppointment(${index})">Delete</button>
+    `;
+    appointmentsList.appendChild(div);
+  });
+}
+
+// Single item manual clearing
+window.deleteAppointment = function(index) {
+  if (confirm("Delete this appointment?")) {
+    appointments.splice(index, 1);
+    saveAppointments();
+    renderAppointments();
+  }
+};
+
+// Global mass wipe script
+clearAllBtn.addEventListener("click", () => {
+  if (appointments.length === 0) {
+    alert("No active appointments to delete.");
+    return;
+  }
+  if (confirm("Delete all appointments? This cannot be undone.")) {
+    appointments = [];
+    saveAppointments();
+    renderAppointments();
+  }
+});
+</script>
+
+</body>
+</html>
