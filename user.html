@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Imaginary Clinic</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+  color:#333;
+}
+
+header{
+  background:#2563eb;
+  color:white;
+  padding:25px;
+  text-align:center;
+}
+
+.book-btn{
+  margin-top:15px;
+  background:white;
+  color:#2563eb;
+  border:none;
+  padding:12px 20px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.book-btn:hover{
+  background:#dbeafe;
+}
+
+.container{
+  max-width:900px;
+  margin:30px auto;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  margin-bottom:25px;
+  text-align:center;
+}
+
+.card h2{
+  color:#2563eb;
+  margin-bottom:15px;
+}
+
+.card p{
+  margin-bottom:20px;
+  line-height:1.6;
+}
+
+.go-btn{
+  display:inline-block;
+  background:#2563eb;
+  color:white;
+  text-decoration:none;
+  padding:12px 20px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.go-btn:hover{
+  background:#1e40af;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Imaginary Clinic</h1>
+  <p>Book Your Appointment Online</p>
+  <button class="book-btn" onclick="window.location.href='https://YOUR-APPOINTMENT-LINK-HERE.com'">
+    Go to Appointment Page
+  </button>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2>Appointments</h2>
+    <p>
+      Click below to open our external appointment booking website.
+      You will be redirected to schedule your visit there.
+    </p>
+
+    <a class="go-btn" href="https://YOUR-APPOINTMENT-LINK-HERE.com" target="_blank">
+      Open Appointment Website
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
