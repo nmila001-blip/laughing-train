@@ -4,88 +4,24 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Book Appointment - Imaginary Clinic</title>
+<!-- Load Supabase Library CDN -->
+<script src="https://jsdelivr.net"></script>
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, sans-serif;
-}
-body{
-  background:#f4f7fb;
-  color:#333;
-}
-header{
-  background:#2563eb;
-  color:white;
-  padding:25px;
-  text-align:center;
-}
-.container{
-  max-width:600px;
-  margin:30px auto;
-  padding:20px;
-}
-.card{
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
-}
-h2{
-  color:#2563eb;
-  margin-bottom:20px;
-}
-.form-group{
-  margin-bottom:15px;
-}
-label{
-  display:block;
-  margin-bottom:5px;
-  font-weight:bold;
-}
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-.btn{
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-  text-decoration:none;
-  display:inline-block;
-  width:100%;
-  text-align:center;
-}
-.primary{
-  background:#2563eb;
-  color:white;
-}
-.primary:hover{
-  background:#1e40af;
-}
-.back-btn{
-  background:white;
-  color:#2563eb;
-  margin-top:10px;
-  border:1px solid #2563eb;
-}
-.back-btn:hover{
-  background:#dbeafe;
-}
-.success-msg{
-  background:#dcfce7;
-  color:#15803d;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:15px;
-  display:none;
-  text-align:center;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+body{background:#f4f7fb;color:#333;}
+header{background:#2563eb;color:white;padding:25px;text-align:center;}
+.container{max-width:600px;margin:30px auto;padding:20px;}
+.card{background:white;padding:25px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+h2{color:#2563eb;margin-bottom:20px;}
+.form-group{margin-bottom:15px;}
+label{display:block;margin-bottom:5px;font-weight:bold;}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;}
+.btn{border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:bold;text-decoration:none;display:inline-block;width:100%;text-align:center;}
+.primary{background:#2563eb;color:white;}
+.primary:hover{background:#1e40af;}
+.back-btn{background:white;color:#2563eb;margin-top:10px;border:1px solid #2563eb;}
+.back-btn:hover{background:#dbeafe;}
+.success-msg{background:#dcfce7;color:#15803d;padding:12px;border-radius:10px;margin-bottom:15px;display:none;text-align:center;}
 </style>
 </head>
 <body>
@@ -125,24 +61,35 @@ input{
 </div>
 
 <script>
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
+// Target Core Parameters
+const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+
+// Establish Database Engine Reference Instance
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
   const newAppointment = {
-    name: document.getElementById('name').value,
-    email: document.getElementById('email').value,
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
     date: document.getElementById('date').value,
     time: document.getElementById('time').value
   };
   
-  let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-  appointments.push(newAppointment);
-  localStorage.setItem('appointments', JSON.stringify(appointments));
-  
-  document.getElementById('bookingForm').reset();
-  const success = document.getElementById('successMsg');
-  success.style.display = 'block';
-  setTimeout(() => { success.style.display = 'none'; }, 4000);
+  const { error } = await supabase
+    .from('appointments')
+    .insert([newAppointment]);
+
+  if (error) {
+    alert("Database Connection Error: " + error.message + "\n\n(Ensure you created the table inside Supabase Dashboard!)");
+  } else {
+    document.getElementById('bookingForm').reset();
+    const success = document.getElementById('successMsg');
+    success.style.display = 'block';
+    setTimeout(() => { success.style.display = 'none'; }, 4000);
+  }
 });
 </script>
 </body>
