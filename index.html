@@ -1,116 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Comprehensive Science Quiz</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
-  padding: 20px;
-}
-.container {
-  max-width: 800px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-h1 {
-  text-align: center;
-}
-.question {
-  margin-bottom: 20px;
-}
-.options button {
-  display: block;
-  width: 100%;
-  margin: 5px 0;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #e9ecef;
-}
-.options button:hover {
-  background: #d0d7de;
-}
-#nextBtn {
-  margin-top: 20px;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #007bff;
-  color: white;
-}
-#score {
-  font-size: 20px;
-  text-align: center;
-  margin-top: 20px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Scheduler</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#f4f7fb;
+      color:#333;
+    }
+
+    header{
+      background:#2563eb;
+      color:white;
+      padding:20px;
+      text-align:center;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:30px auto;
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:25px;
+      padding:20px;
+    }
+
+    .card{
+      background:white;
+      padding:25px;
+      border-radius:15px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .calendar-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+
+    .calendar-header button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:10px 15px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .calendar-header button:hover{
+      background:#1e40af;
+    }
+
+    .calendar{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    .day-name,
+    .day{
+      text-align:center;
+      padding:12px;
+      border-radius:10px;
+    }
+
+    .day-name{
+      font-weight:bold;
+      background:#dbeafe;
+    }
+
+    .day{
+      background:#f1f5f9;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .day:hover{
+      background:#93c5fd;
+      color:white;
+    }
+
+    .empty{
+      background:transparent;
+      cursor:default;
+    }
+
+    .selected{
+      background:#2563eb !important;
+      color:white;
+    }
+
+    h2{
+      margin-bottom:15px;
+      color:#2563eb;
+    }
+
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+    }
+
+    input,
+    button{
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:16px;
+    }
+
+    .times{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .time-slot{
+      background:#eff6ff;
+      padding:12px;
+      text-align:center;
+      border-radius:10px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .time-slot:hover{
+      background:#2563eb;
+      color:white;
+    }
+
+    .time-selected{
+      background:#1d4ed8 !important;
+      color:white;
+    }
+
+    .submit-btn{
+      background:#2563eb;
+      color:white;
+      border:none;
+      cursor:pointer;
+    }
+
+    .submit-btn:hover{
+      background:#1e40af;
+    }
+
+    .confirmation{
+      display:none;
+      margin-top:20px;
+      background:#dcfce7;
+      padding:15px;
+      border-radius:10px;
+      color:#166534;
+    }
+
+    @media(max-width:800px){
+      .container{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 
+<header>
+  <h1>Appointment Booking Calendar</h1>
+  <p>Select any date and available time</p>
+</header>
+
 <div class="container">
-  <h1>Science Quiz</h1>
-  <div id="quiz"></div>
-  <button id="nextBtn">Next</button>
-  <div id="score"></div>
+
+  <!-- Calendar -->
+  <div class="card">
+
+    <div class="calendar-header">
+      <button id="prevMonth">◀ Prev</button>
+      <h2 id="monthYear"></h2>
+      <button id="nextMonth">Next ▶</button>
+    </div>
+
+    <div class="calendar" id="calendar">
+      <div class="day-name">Sun</div>
+      <div class="day-name">Mon</div>
+      <div class="day-name">Tue</div>
+      <div class="day-name">Wed</div>
+      <div class="day-name">Thu</div>
+      <div class="day-name">Fri</div>
+      <div class="day-name">Sat</div>
+    </div>
+
+  </div>
+
+  <!-- Booking Form -->
+  <div class="card">
+
+    <h2>Book Appointment</h2>
+
+    <form id="bookingForm">
+
+      <input type="text" id="name" placeholder="Your Name" required>
+
+      <input type="email" id="email" placeholder="Your Email" required>
+
+      <input type="text" id="selectedDate" placeholder="Selected Date" readonly>
+
+      <input type="text" id="selectedTime" placeholder="Selected Time" readonly>
+
+      <h3>Available Times</h3>
+
+      <div class="times" id="timesContainer"></div>
+
+      <button type="submit" class="submit-btn">
+        Confirm Appointment
+      </button>
+
+    </form>
+
+    <div class="confirmation" id="confirmation">
+      Appointment successfully booked!
+    </div>
+
+  </div>
+
 </div>
 
 <script>
-const questions = [
-  {q:"What is an ecosystem?", a:["Only plants","Living and nonliving things interacting","Only animals","Weather system"], c:1},
-  {q:"What is a producer?", a:["Eats others","Makes its own food","Breaks down dead matter","Moves energy"], c:1},
-  {q:"Function of decomposers?", a:["Make food","Break down dead organisms","Hunt","Photosynthesis"], c:1},
-  {q:"What is classification?", a:["Studying rocks","Grouping organisms","Weather study","Cells only"], c:1},
-  {q:"Correct classification order?", a:["Species to Kingdom","Kingdom to Species","Class to Domain","Order to Species"], c:1},
-  {q:"Darwin is known for?", a:["Cell theory","Evolution by natural selection","Gravity","Atoms"], c:1},
-  {q:"Natural selection means?", a:["Humans choose traits","Best traits survive","All survive","Random survival"], c:1},
-  {q:"What is a pathogen?", a:["Helpful bacteria","Disease-causing organism","Plant cell","Virus protector"], c:1},
-  {q:"Immune system function?", a:["Digestion","Fight disease","Move muscles","Make bones"], c:1},
-  {q:"Skeletal system does what?", a:["Protect/support","Digests food","Pumps blood","Controls hormones"], c:0}
-];
 
-let current = 0;
-let score = 0;
+  const calendar = document.getElementById("calendar");
+  const monthYear = document.getElementById("monthYear");
 
-const quizDiv = document.getElementById("quiz");
-const nextBtn = document.getElementById("nextBtn");
-const scoreDiv = document.getElementById("score");
+  const selectedDateInput = document.getElementById("selectedDate");
+  const selectedTimeInput = document.getElementById("selectedTime");
 
-function loadQuestion() {
-  if (current >= questions.length) {
-    quizDiv.innerHTML = "";
-    nextBtn.style.display = "none";
-    scoreDiv.innerHTML = `You scored ${score} / ${questions.length}`;
-    return;
+  const timesContainer = document.getElementById("timesContainer");
+
+  const confirmation = document.getElementById("confirmation");
+
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  let currentDate = new Date();
+
+  const timeSlots = [
+    "9:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "1:00 PM",
+    "2:00 PM",
+    "3:00 PM",
+    "4:00 PM",
+    "5:00 PM"
+  ];
+
+  // Render Calendar
+  function renderCalendar() {
+
+    // Remove old days
+    const oldDays = document.querySelectorAll(".day, .empty");
+    oldDays.forEach(day => day.remove());
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    monthYear.textContent = `${months[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Empty spaces
+    for(let i = 0; i < firstDay; i++) {
+      const empty = document.createElement("div");
+      empty.classList.add("empty");
+      calendar.appendChild(empty);
+    }
+
+    // Days
+    for(let day = 1; day <= daysInMonth; day++) {
+
+      const dayElement = document.createElement("div");
+
+      dayElement.classList.add("day");
+
+      dayElement.textContent = day;
+
+      dayElement.addEventListener("click", () => {
+
+        document.querySelectorAll(".day")
+          .forEach(d => d.classList.remove("selected"));
+
+        dayElement.classList.add("selected");
+
+        const selectedDate =
+          `${months[month]} ${day}, ${year}`;
+
+        selectedDateInput.value = selectedDate;
+
+        loadTimeSlots();
+      });
+
+      calendar.appendChild(dayElement);
+    }
   }
 
-  const q = questions[current];
-  quizDiv.innerHTML = `<div class='question'><h3>${q.q}</h3>
-  <div class='options'>
-    ${q.a.map((opt,i)=>`<button onclick='select(${i})'>${opt}</button>`).join('')}
-  </div></div>`;
-}
+  // Load Times
+  function loadTimeSlots() {
 
-window.select = function(i){
-  if(i === questions[current].c) score++;
-  current++;
-  loadQuestion();
-}
+    timesContainer.innerHTML = "";
 
-nextBtn.onclick = () => {
-  current++;
-  loadQuestion();
-}
+    timeSlots.forEach(time => {
 
-loadQuestion();
+      const timeElement = document.createElement("div");
+
+      timeElement.classList.add("time-slot");
+
+      timeElement.textContent = time;
+
+      timeElement.addEventListener("click", () => {
+
+        document.querySelectorAll(".time-slot")
+          .forEach(t => t.classList.remove("time-selected"));
+
+        timeElement.classList.add("time-selected");
+
+        selectedTimeInput.value = time;
+      });
+
+      timesContainer.appendChild(timeElement);
+
+    });
+  }
+
+  // Next Month
+  document.getElementById("nextMonth")
+    .addEventListener("click", () => {
+
+      currentDate.setMonth(currentDate.getMonth() + 1);
+
+      renderCalendar();
+  });
+
+  // Previous Month
+  document.getElementById("prevMonth")
+    .addEventListener("click", () => {
+
+      currentDate.setMonth(currentDate.getMonth() - 1);
+
+      renderCalendar();
+  });
+
+  // Submit Form
+  document.getElementById("bookingForm")
+    .addEventListener("submit", function(e){
+
+      e.preventDefault();
+
+      if(!selectedDateInput.value ||
+         !selectedTimeInput.value){
+
+        alert("Please select a date and time.");
+        return;
+      }
+
+      confirmation.style.display = "block";
+
+      this.reset();
+
+      timesContainer.innerHTML = "";
+
+      setTimeout(() => {
+        confirmation.style.display = "none";
+      }, 4000);
+  });
+
+  // Start Calendar
+  renderCalendar();
+
 </script>
 
 </body>
