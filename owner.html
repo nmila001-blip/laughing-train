@@ -4,142 +4,34 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Owner Dashboard - Imaginary Clinic</title>
+<script src="https://jsdelivr.net"></script>
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, sans-serif;
-}
-body{
-  background:#f4f7fb;
-  color:#333;
-}
-header{
-  background:#2563eb;
-  color:white;
-  padding:25px;
-  text-align:center;
-}
-.container{
-  max-width:1000px;
-  margin:30px auto;
-  padding:20px;
-}
-.card{
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  margin-bottom:25px;
-}
-h2{
-  color:#2563eb;
-  margin-bottom:15px;
-}
-.top-actions{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-top:15px;
-  justify-content:center;
-}
-.btn{
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-  text-decoration:none;
-  display:inline-block;
-}
-.primary{
-  background:#2563eb;
-  color:white;
-}
-.primary:hover{
-  background:#1e40af;
-}
-.success{
-  background:#10b981;
-  color:white;
-}
-.success:hover{
-  background:#047857;
-}
-.danger{
-  background:#dc2626;
-  color:white;
-}
-.danger:hover{
-  background:#991b1b;
-}
-.logout{
-  background:white;
-  color:#2563eb;
-}
-.logout:hover{
-  background:#dbeafe;
-}
-/* Admin Tools Layout */
-.admin-tools {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  background: #f8fafc;
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  align-items: center;
-}
-.search-input {
-  flex: 2;
-  min-width: 200px;
-}
-.date-input {
-  flex: 1;
-  min-width: 150px;
-}
-.appointment{
-  background:#eff6ff;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-  border-left:5px solid #2563eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.appointment h3{
-  margin-bottom:8px;
-}
-.appointment p{
-  margin:4px 0;
-}
-.empty{
-  text-align:center;
-  color:#666;
-  padding:20px 0;
-}
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-input{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-.note{
-  background:#fef3c7;
-  color:#92400e;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:20px;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+body{background:#f4f7fb;color:#333;}
+header{background:#2563eb;color:white;padding:25px;text-align:center;}
+.container{max-width:1000px;margin:30px auto;padding:20px;}
+.card{background:white;padding:25px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08);margin-bottom:25px;}
+h2{color:#2563eb;margin-bottom:15px;}
+.top-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px;justify-content:center;}
+.btn{border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:bold;text-decoration:none;display:inline-block;}
+.primary{background:#2563eb;color:white;}
+.primary:hover{background:#1e40af;}
+.success{background:#10b981;color:white;}
+.success:hover{background:#047857;}
+.danger{background:#dc2626;color:white;}
+.danger:hover{background:#991b1b;}
+.logout{background:white;color:#2563eb;}
+.logout:hover{background:#dbeafe;}
+.admin-tools {display: flex;gap: 15px;flex-wrap: wrap;margin-bottom: 20px;background: #f8fafc;padding: 15px;border-radius: 10px;border: 1px solid #e2e8f0;align-items: center;}
+.search-input {flex: 2;min-width: 200px;}
+.date-input {flex: 1;min-width: 150px;}
+.appointment{background:#eff6ff;padding:15px;border-radius:10px;margin-bottom:15px;border-left:5px solid #2563eb;display: flex;justify-content: space-between;align-items: center;}
+.appointment h3{margin-bottom:8px;}
+.appointment p{margin:4px 0;}
+.empty{text-align:center;color:#666;padding:20px 0;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+input{padding:12px;border-radius:10px;border:1px solid #ccc;}
+.note{background:#fef3c7;color:#92400e;padding:12px;border-radius:10px;margin-bottom:20px;}
 </style>
 </head>
 <body>
@@ -154,11 +46,11 @@ input{
 </header>
 
 <div class="container">
-  <!-- Login Section View -->
+  <!-- Login Form Screen -->
   <div class="card" id="loginCard">
     <h2>Owner Login</h2>
     <div class="note">
-      This is a simple front-end dashboard. For real security, use a backend login system.
+      Connected to Database Project Endpoint: fsbpbnurfbubflszjmas
     </div>
     <div class="controls">
       <input type="email" id="ownerEmail" placeholder="Owner Email" style="min-width:240px;" />
@@ -172,7 +64,6 @@ input{
   <div class="card" id="dashboardCard" style="display:none;">
     <h2>Appointments Management</h2>
     
-    <!-- Administrative Management Tools -->
     <div class="admin-tools">
       <input type="text" id="searchBar" class="search-input" placeholder="🔍 Search by Patient Name or Email..." />
       <input type="date" id="dateFilter" class="date-input" title="Filter by Date" />
@@ -187,6 +78,11 @@ input{
 const OWNER_EMAIL = "nmila001@doral.colegia.org";
 const OWNER_PASSWORD = "05222014nm";
 
+// Core Database URL Path Mappings
+const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+
+let supabase;
 let appointments = [];
 
 const loginBtn = document.getElementById("loginBtn");
@@ -195,8 +91,6 @@ const loginCard = document.getElementById("loginCard");
 const dashboardCard = document.getElementById("dashboardCard");
 const appointmentsList = document.getElementById("appointmentsList");
 const clearAllBtn = document.getElementById("clearAllBtn");
-
-// Administrative Element Hooks
 const searchBar = document.getElementById("searchBar");
 const dateFilter = document.getElementById("dateFilter");
 const exportBtn = document.getElementById("exportBtn");
@@ -210,33 +104,43 @@ loginBtn.addEventListener("click", () => {
     loginCard.style.display = "none";
     dashboardCard.style.display = "block";
     clearAllBtn.style.display = "inline-block";
-    renderAppointments();
+
+    // Inject matching session validation filters securely via the configuration options
+    supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      global: {
+        headers: {
+          'x-dashboard-password': password
+        }
+      }
+    });
+
+    fetchAppointments();
   } else {
     loginMsg.style.display = "block";
     dashboardCard.style.display = "none";
-    clearAllBtn.style.display = "none";
   }
 });
 
-function saveAppointments() {
-  localStorage.setItem("appointments", JSON.stringify(appointments));
+async function fetchAppointments() {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('*')
+    .order('date', { ascending: true })
+    .order('time', { ascending: true });
+
+  if (error) {
+    alert("Database RLS Access Error: " + error.message + "\n\n(Verify that the appointments table exists in Supabase!)");
+    return;
+  }
+  
+  appointments = data;
+  renderAppointments();
 }
 
-// Render Engine with Active Query Filters
 function renderAppointments() {
-  appointments = JSON.parse(localStorage.getItem("appointments")) || [];
-  
-  // Chronological sorting (Soonest date and time first)
-  appointments.sort((a, b) => {
-    const dateTimeA = new Date(`${a.date}T${a.time || '00:00'}`);
-    const dateTimeB = new Date(`${b.date}T${b.time || '00:00'}`);
-    return dateTimeA - dateTimeB;
-  });
-
   const searchQuery = searchBar.value.toLowerCase();
   const targetDate = dateFilter.value;
 
-  // Filter out datasets that don't match the inputs
   const filteredAppointments = appointments.filter(appt => {
     const matchesSearch = (appt.name || '').toLowerCase().includes(searchQuery) || 
                           (appt.email || '').toLowerCase().includes(searchQuery);
@@ -245,15 +149,13 @@ function renderAppointments() {
   });
 
   if (filteredAppointments.length === 0) {
-    appointmentsList.innerHTML = '<p class="empty">No matching appointments found.</p>';
+    appointmentsList.innerHTML = '<p class="empty">No appointments found.</p>';
     return;
   }
 
   appointmentsList.innerHTML = "";
 
-  // The rendering logic uses the original index from the master array for precise deletions
   filteredAppointments.forEach((appt) => {
-    const trueIndex = appointments.indexOf(appt);
     const div = document.createElement("div");
     div.className = "appointment";
     div.innerHTML = `
@@ -263,59 +165,43 @@ function renderAppointments() {
         <p><strong>Date:</strong> ${appt.date || 'None'}</p>
         <p><strong>Time:</strong> ${appt.time || 'None'}</p>
       </div>
-      <button class="btn danger" onclick="deleteAppointment(${trueIndex})">Delete</button>
+      <button class="btn danger" onclick="deleteAppointment(${appt.id})">Delete</button>
     `;
     appointmentsList.appendChild(div);
   });
 }
 
-// Event Listeners for real-time live filtering
 searchBar.addEventListener("input", renderAppointments);
 dateFilter.addEventListener("change", renderAppointments);
 
-// Individual Card Deletion
-window.deleteAppointment = function(index) {
+window.deleteAppointment = function(id) {
   if (confirm("Delete this appointment?")) {
-    appointments.splice(index, 1);
-    saveAppointments();
-    renderAppointments();
+    supabase.from('appointments').delete().eq('id', id).then(({ error }) => {
+      if (error) alert("Action blocked by database rules: " + error.message);
+      else fetchAppointments();
+    });
   }
 };
 
-// Global Table Evacuation 
 clearAllBtn.addEventListener("click", () => {
-  if (appointments.length === 0) {
-    alert("No active appointments to delete.");
-    return;
-  }
-  if (confirm("Delete all appointments? This cannot be undone.")) {
-    appointments = [];
-    saveAppointments();
-    renderAppointments();
+  if (appointments.length === 0) return;
+  if (confirm("Delete ALL entries?")) {
+    supabase.from('appointments').delete().neq('id', 0).then(({ error }) => {
+      if (error) alert("Action blocked by database rules: " + error.message);
+      else fetchAppointments();
+    });
   }
 });
 
-// CSV spreadsheet spreadsheet compilation script
 exportBtn.addEventListener("click", () => {
-  if (appointments.length === 0) {
-    alert("No data available to export.");
-    return;
-  }
-
-  let csvContent = "data:text/csv;charset=utf-8,Patient Name,Email Address,Appointment Date,Time\n";
-  
-  appointments.forEach(appt => {
-    const name = `"${(appt.name || '').replace(/"/g, '""')}"`;
-    const email = `"${(appt.email || '').replace(/"/g, '""')}"`;
-    const date = `"${appt.date || ''}"`;
-    const time = `"${appt.time || ''}"`;
-    csvContent += `${name},${email},${date},${time}\n`;
+  if (appointments.length === 0) return alert("No data to export.");
+  let csvContent = "data:text/csv;charset=utf-8,Name,Email,Date,Time\n";
+  appointments.forEach(a => {
+    csvContent += `"${a.name}","${a.email}","${a.date}","${a.time}"\n`;
   });
-
-  const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "clinic_appointments.csv");
+  link.setAttribute("href", encodeURI(csvContent));
+  link.setAttribute("download", "clinic_schedule.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
