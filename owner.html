@@ -60,6 +60,13 @@ h2{
 .primary:hover{
   background:#1e40af;
 }
+.success{
+  background:#10b981;
+  color:white;
+}
+.success:hover{
+  background:#047857;
+}
 .danger{
   background:#dc2626;
   color:white;
@@ -73,6 +80,26 @@ h2{
 }
 .logout:hover{
   background:#dbeafe;
+}
+/* Admin Tools Layout */
+.admin-tools {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  align-items: center;
+}
+.search-input {
+  flex: 2;
+  min-width: 200px;
+}
+.date-input {
+  flex: 1;
+  min-width: 150px;
 }
 .appointment{
   background:#eff6ff;
@@ -105,7 +132,6 @@ input{
   padding:12px;
   border-radius:10px;
   border:1px solid #ccc;
-  min-width:240px;
 }
 .note{
   background:#fef3c7;
@@ -135,8 +161,8 @@ input{
       This is a simple front-end dashboard. For real security, use a backend login system.
     </div>
     <div class="controls">
-      <input type="email" id="ownerEmail" placeholder="Owner Email" />
-      <input type="password" id="ownerPassword" placeholder="Password" />
+      <input type="email" id="ownerEmail" placeholder="Owner Email" style="min-width:240px;" />
+      <input type="password" id="ownerPassword" placeholder="Password" style="min-width:240px;" />
       <button class="btn primary" id="loginBtn">Login</button>
     </div>
     <p id="loginMsg" style="margin-top:12px;color:red;display:none;">Incorrect email or password.</p>
@@ -144,7 +170,15 @@ input{
 
   <!-- Protected Schedule View -->
   <div class="card" id="dashboardCard" style="display:none;">
-    <h2>Appointments</h2>
+    <h2>Appointments Management</h2>
+    
+    <!-- Administrative Management Tools -->
+    <div class="admin-tools">
+      <input type="text" id="searchBar" class="search-input" placeholder="🔍 Search by Patient Name or Email..." />
+      <input type="date" id="dateFilter" class="date-input" title="Filter by Date" />
+      <button class="btn success" id="exportBtn">📊 Export to Excel/CSV</button>
+    </div>
+
     <div id="appointmentsList"></div>
   </div>
 </div>
@@ -161,6 +195,11 @@ const loginCard = document.getElementById("loginCard");
 const dashboardCard = document.getElementById("dashboardCard");
 const appointmentsList = document.getElementById("appointmentsList");
 const clearAllBtn = document.getElementById("clearAllBtn");
+
+// Administrative Element Hooks
+const searchBar = document.getElementById("searchBar");
+const dateFilter = document.getElementById("dateFilter");
+const exportBtn = document.getElementById("exportBtn");
 
 loginBtn.addEventListener("click", () => {
   const email = document.getElementById("ownerEmail").value.trim();
@@ -183,17 +222,38 @@ function saveAppointments() {
   localStorage.setItem("appointments", JSON.stringify(appointments));
 }
 
+// Render Engine with Active Query Filters
 function renderAppointments() {
   appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+  
+  // Chronological sorting (Soonest date and time first)
+  appointments.sort((a, b) => {
+    const dateTimeA = new Date(`${a.date}T${a.time || '00:00'}`);
+    const dateTimeB = new Date(`${b.date}T${b.time || '00:00'}`);
+    return dateTimeA - dateTimeB;
+  });
 
-  if (appointments.length === 0) {
-    appointmentsList.innerHTML = '<p class="empty">No appointments yet.</p>';
+  const searchQuery = searchBar.value.toLowerCase();
+  const targetDate = dateFilter.value;
+
+  // Filter out datasets that don't match the inputs
+  const filteredAppointments = appointments.filter(appt => {
+    const matchesSearch = (appt.name || '').toLowerCase().includes(searchQuery) || 
+                          (appt.email || '').toLowerCase().includes(searchQuery);
+    const matchesDate = !targetDate || appt.date === targetDate;
+    return matchesSearch && matchesDate;
+  });
+
+  if (filteredAppointments.length === 0) {
+    appointmentsList.innerHTML = '<p class="empty">No matching appointments found.</p>';
     return;
   }
 
   appointmentsList.innerHTML = "";
 
-  appointments.forEach((appt, index) => {
+  // The rendering logic uses the original index from the master array for precise deletions
+  filteredAppointments.forEach((appt) => {
+    const trueIndex = appointments.indexOf(appt);
     const div = document.createElement("div");
     div.className = "appointment";
     div.innerHTML = `
@@ -203,12 +263,17 @@ function renderAppointments() {
         <p><strong>Date:</strong> ${appt.date || 'None'}</p>
         <p><strong>Time:</strong> ${appt.time || 'None'}</p>
       </div>
-      <button class="btn danger" onclick="deleteAppointment(${index})">Delete</button>
+      <button class="btn danger" onclick="deleteAppointment(${trueIndex})">Delete</button>
     `;
     appointmentsList.appendChild(div);
   });
 }
 
+// Event Listeners for real-time live filtering
+searchBar.addEventListener("input", renderAppointments);
+dateFilter.addEventListener("change", renderAppointments);
+
+// Individual Card Deletion
 window.deleteAppointment = function(index) {
   if (confirm("Delete this appointment?")) {
     appointments.splice(index, 1);
@@ -217,6 +282,7 @@ window.deleteAppointment = function(index) {
   }
 };
 
+// Global Table Evacuation 
 clearAllBtn.addEventListener("click", () => {
   if (appointments.length === 0) {
     alert("No active appointments to delete.");
@@ -227,6 +293,32 @@ clearAllBtn.addEventListener("click", () => {
     saveAppointments();
     renderAppointments();
   }
+});
+
+// CSV spreadsheet spreadsheet compilation script
+exportBtn.addEventListener("click", () => {
+  if (appointments.length === 0) {
+    alert("No data available to export.");
+    return;
+  }
+
+  let csvContent = "data:text/csv;charset=utf-8,Patient Name,Email Address,Appointment Date,Time\n";
+  
+  appointments.forEach(appt => {
+    const name = `"${(appt.name || '').replace(/"/g, '""')}"`;
+    const email = `"${(appt.email || '').replace(/"/g, '""')}"`;
+    const date = `"${appt.date || ''}"`;
+    const time = `"${appt.time || ''}"`;
+    csvContent += `${name},${email},${date},${time}\n`;
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "clinic_appointments.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 });
 </script>
 </body>
