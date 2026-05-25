@@ -79,11 +79,12 @@ const OWNER_EMAIL = "nmila001@doral.colegia.org";
 const OWNER_PASSWORD = "05222014nm";
 
 // Core Database URL Path Mappings
-const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_URL = "https://supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
 let supabase;
 let appointments = [];
+let refreshInterval; // Variable to hold our 2-second timer loop
 
 const loginBtn = document.getElementById("loginBtn");
 const loginMsg = document.getElementById("loginMsg");
@@ -105,7 +106,7 @@ loginBtn.addEventListener("click", () => {
     dashboardCard.style.display = "block";
     clearAllBtn.style.display = "inline-block";
 
-    // Inject matching session validation filters securely via the configuration options
+    // Inject matching session validation filters securely
     supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       global: {
         headers: {
@@ -114,7 +115,12 @@ loginBtn.addEventListener("click", () => {
       }
     });
 
+    // Run the initial fetch immediately
     fetchAppointments();
+
+    // 🔄 AUTOMATIC REFRESH LOOP: Fetch from database every 2000 milliseconds (2 seconds)
+    refreshInterval = setInterval(fetchAppointments, 2000);
+    
   } else {
     loginMsg.style.display = "block";
     dashboardCard.style.display = "none";
@@ -122,6 +128,9 @@ loginBtn.addEventListener("click", () => {
 });
 
 async function fetchAppointments() {
+  // If we haven't initialized Supabase client yet, skip
+  if (!supabase) return;
+
   const { data, error } = await supabase
     .from('appointments')
     .select('*')
@@ -129,7 +138,7 @@ async function fetchAppointments() {
     .order('time', { ascending: true });
 
   if (error) {
-    alert("Database RLS Access Error: " + error.message + "\n\n(Verify that the appointments table exists in Supabase!)");
+    console.error("Database RLS Access Error: " + error.message);
     return;
   }
   
