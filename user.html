@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Imaginary Clinic</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Appointment - Imaginary Clinic</title>
 <style>
 *{
   margin:0;
@@ -13,98 +11,139 @@
   box-sizing:border-box;
   font-family:Arial, sans-serif;
 }
-
 body{
   background:#f4f7fb;
   color:#333;
 }
-
 header{
   background:#2563eb;
   color:white;
   padding:25px;
   text-align:center;
 }
-
-.book-btn{
-  margin-top:15px;
-  background:white;
-  color:#2563eb;
-  border:none;
-  padding:12px 20px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.book-btn:hover{
-  background:#dbeafe;
-}
-
 .container{
-  max-width:900px;
+  max-width:600px;
   margin:30px auto;
   padding:20px;
 }
-
 .card{
   background:white;
   padding:25px;
   border-radius:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  margin-bottom:25px;
-  text-align:center;
 }
-
-.card h2{
+h2{
   color:#2563eb;
+  margin-bottom:20px;
+}
+.form-group{
   margin-bottom:15px;
 }
-
-.card p{
-  margin-bottom:20px;
-  line-height:1.6;
-}
-
-.go-btn{
-  display:inline-block;
-  background:#2563eb;
-  color:white;
-  text-decoration:none;
-  padding:12px 20px;
-  border-radius:10px;
+label{
+  display:block;
+  margin-bottom:5px;
   font-weight:bold;
 }
-
-.go-btn:hover{
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+.btn{
+  border:none;
+  padding:12px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  text-decoration:none;
+  display:inline-block;
+  width:100%;
+  text-align:center;
+}
+.primary{
+  background:#2563eb;
+  color:white;
+}
+.primary:hover{
   background:#1e40af;
+}
+.back-btn{
+  background:white;
+  color:#2563eb;
+  margin-top:10px;
+  border:1px solid #2563eb;
+}
+.back-btn:hover{
+  background:#dbeafe;
+}
+.success-msg{
+  background:#dcfce7;
+  color:#15803d;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:15px;
+  display:none;
+  text-align:center;
 }
 </style>
 </head>
-
 <body>
 
 <header>
   <h1>Imaginary Clinic</h1>
-  <p>Book Your Appointment Online</p>
-  <button class="book-btn" onclick="window.location.href='https://YOUR-APPOINTMENT-LINK-HERE.com'">
-    Go to Appointment Page
-  </button>
+  <p>Patient Booking Portal</p>
 </header>
 
 <div class="container">
   <div class="card">
-    <h2>Appointments</h2>
-    <p>
-      Click below to open our external appointment booking website.
-      You will be redirected to schedule your visit there.
-    </p>
-
-    <a class="go-btn" href="https://YOUR-APPOINTMENT-LINK-HERE.com" target="_blank">
-      Open Appointment Website
-    </a>
+    <h2>Schedule a Visit</h2>
+    <div id="successMsg" class="success-msg">Appointment booked successfully!</div>
+    
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="form-group">
+        <label for="date">Appointment Date</label>
+        <input type="date" id="date" required />
+      </div>
+      <div class="form-group">
+        <label for="time">Preferred Time</label>
+        <input type="time" id="time" required />
+      </div>
+      
+      <button type="submit" class="btn primary">Submit Appointment</button>
+      <a href="index.html" class="btn back-btn">Back to Home</a>
+    </form>
   </div>
 </div>
 
+<script>
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const newAppointment = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    date: document.getElementById('date').value,
+    time: document.getElementById('time').value
+  };
+  
+  let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+  appointments.push(newAppointment);
+  localStorage.setItem('appointments', JSON.stringify(appointments));
+  
+  document.getElementById('bookingForm').reset();
+  const success = document.getElementById('successMsg');
+  success.style.display = 'block';
+  setTimeout(() => { success.style.display = 'none'; }, 4000);
+});
+</script>
 </body>
 </html>
