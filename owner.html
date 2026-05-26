@@ -68,7 +68,7 @@ input{padding:12px;border-radius:10px;border:1px solid #ccc;}
     </div>
     
     <div class="admin-tools">
-      <input type="text" id="searchBar" class="search-input" placeholder="🔍 Search by Patient Name or Email..." />
+      <input type="text" id="searchBar" class="search-input" placeholder="🔍 Optional: Search by Name or Email..." />
       <input type="date" id="dateFilter" class="date-input" title="Filter by Date" />
       <button class="btn success" id="exportBtn">📊 Export to Excel/CSV</button>
     </div>
@@ -110,7 +110,7 @@ loginBtn.addEventListener("click", () => {
     dashboardCard.style.display = "block";
     clearAllBtn.style.display = "inline-block";
 
-    // Load list and spin up automatic updater immediately
+    // Load full list instantly and poll database updates every 2 seconds
     fetchAppointments();
     autoRefreshTimer = setInterval(fetchAppointments, 2000);
   } else {
@@ -131,7 +131,7 @@ async function fetchAppointments() {
     return;
   }
   
-  // Only redraw UI if database records have actually changed (avoids UI glitching)
+  // Compares incoming data with local variables to avoid screen layout flicker during auto-refresh
   if (JSON.stringify(appointments) !== JSON.stringify(data)) {
     appointments = data;
     renderAppointments();
@@ -142,8 +142,10 @@ function renderAppointments() {
   const searchQuery = searchBar.value.toLowerCase();
   const targetDate = dateFilter.value;
 
+  // Loops through items to process active search fields or fallback to full display default
   const filteredAppointments = appointments.filter(appt => {
-    const matchesSearch = (appt.name || '').toLowerCase().includes(searchQuery) || 
+    const matchesSearch = !searchQuery || 
+                          (appt.name || '').toLowerCase().includes(searchQuery) || 
                           (appt.email || '').toLowerCase().includes(searchQuery);
     const matchesDate = !targetDate || appt.date === targetDate;
     return matchesSearch && matchesDate;
