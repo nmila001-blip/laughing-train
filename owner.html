@@ -46,11 +46,11 @@ input{padding:12px;border-radius:10px;border:1px solid #ccc;}
 </header>
 
 <div class="container">
-  <!-- Login Form Screen -->
+  <!-- Owner Login -->
   <div class="card" id="loginCard">
     <h2>Owner Login</h2>
     <div class="note">
-      Connected to Database Project Endpoint: fsbpbnurfbubflszjmas
+      Connected securely to project database endpoint.
     </div>
     <div class="controls">
       <input type="email" id="ownerEmail" placeholder="Owner Email" style="min-width:240px;" />
@@ -60,9 +60,12 @@ input{padding:12px;border-radius:10px;border:1px solid #ccc;}
     <p id="loginMsg" style="margin-top:12px;color:red;display:none;">Incorrect email or password.</p>
   </div>
 
-  <!-- Protected Schedule View -->
+  <!-- Main Management View -->
   <div class="card" id="dashboardCard" style="display:none;">
-    <h2>Appointments Management</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h2>Appointments Management</h2>
+      <button class="btn primary" id="manualRefreshBtn" style="padding: 8px 12px; font-size: 13px;">🔄 Refresh List</button>
+    </div>
     
     <div class="admin-tools">
       <input type="text" id="searchBar" class="search-input" placeholder="🔍 Search by Patient Name or Email..." />
@@ -78,13 +81,13 @@ input{padding:12px;border-radius:10px;border:1px solid #ccc;}
 const OWNER_EMAIL = "nmila001@doral.colegia.org";
 const OWNER_PASSWORD = "05222014nm";
 
-// Core Database URL Path Mappings
 const SUPABASE_URL = "https://supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
-let supabase;
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
 let appointments = [];
-let refreshInterval; // Variable to hold our 2-second timer loop
+let autoRefreshTimer;
 
 const loginBtn = document.getElementById("loginBtn");
 const loginMsg = document.getElementById("loginMsg");
@@ -95,6 +98,7 @@ const clearAllBtn = document.getElementById("clearAllBtn");
 const searchBar = document.getElementById("searchBar");
 const dateFilter = document.getElementById("dateFilter");
 const exportBtn = document.getElementById("exportBtn");
+const manualRefreshBtn = document.getElementById("manualRefreshBtn");
 
 loginBtn.addEventListener("click", () => {
   const email = document.getElementById("ownerEmail").value.trim();
@@ -106,21 +110,9 @@ loginBtn.addEventListener("click", () => {
     dashboardCard.style.display = "block";
     clearAllBtn.style.display = "inline-block";
 
-    // Inject matching session validation filters securely
-    supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      global: {
-        headers: {
-          'x-dashboard-password': password
-        }
-      }
-    });
-
-    // Run the initial fetch immediately
+    // Load list and spin up automatic updater immediately
     fetchAppointments();
-
-    // 🔄 AUTOMATIC REFRESH LOOP: Fetch from database every 2000 milliseconds (2 seconds)
-    refreshInterval = setInterval(fetchAppointments, 2000);
-    
+    autoRefreshTimer = setInterval(fetchAppointments, 2000);
   } else {
     loginMsg.style.display = "block";
     dashboardCard.style.display = "none";
@@ -128,9 +120,6 @@ loginBtn.addEventListener("click", () => {
 });
 
 async function fetchAppointments() {
-  // If we haven't initialized Supabase client yet, skip
-  if (!supabase) return;
-
   const { data, error } = await supabase
     .from('appointments')
     .select('*')
@@ -138,12 +127,15 @@ async function fetchAppointments() {
     .order('time', { ascending: true });
 
   if (error) {
-    console.error("Database RLS Access Error: " + error.message);
+    console.error("Fetch Error: ", error.message);
     return;
   }
   
-  appointments = data;
-  renderAppointments();
+  // Only redraw UI if database records have actually changed (avoids UI glitching)
+  if (JSON.stringify(appointments) !== JSON.stringify(data)) {
+    appointments = data;
+    renderAppointments();
+  }
 }
 
 function renderAppointments() {
@@ -182,29 +174,28 @@ function renderAppointments() {
 
 searchBar.addEventListener("input", renderAppointments);
 dateFilter.addEventListener("change", renderAppointments);
+manualRefreshBtn.addEventListener("click", fetchAppointments);
 
-window.deleteAppointment = function(id) {
-  if (confirm("Delete this appointment?")) {
-    supabase.from('appointments').delete().eq('id', id).then(({ error }) => {
-      if (error) alert("Action blocked by database rules: " + error.message);
-      else fetchAppointments();
-    });
+window.deleteAppointment = async function(id) {
+  if (confirm("Delete this appointment permanently?")) {
+    const { error } = await supabase.from('appointments').delete().eq('id', id);
+    if (error) alert("Could not delete record: " + error.message);
+    else fetchAppointments();
   }
 };
 
-clearAllBtn.addEventListener("click", () => {
+clearAllBtn.addEventListener("click", async () => {
   if (appointments.length === 0) return;
-  if (confirm("Delete ALL entries?")) {
-    supabase.from('appointments').delete().neq('id', 0).then(({ error }) => {
-      if (error) alert("Action blocked by database rules: " + error.message);
-      else fetchAppointments();
-    });
+  if (confirm("Are you absolutely sure you want to delete ALL appointments?")) {
+    const { error } = await supabase.from('appointments').delete().neq('id', 0);
+    if (error) alert("Could not clear records: " + error.message);
+    else fetchAppointments();
   }
 });
 
 exportBtn.addEventListener("click", () => {
-  if (appointments.length === 0) return alert("No data to export.");
-  let csvContent = "data:text/csv;charset=utf-8,Name,Email,Date,Time\n";
+  if (appointments.length === 0) return alert("No layout data to export.");
+  let csvContent = "data:text/csv;charset=utf-8,Patient Name,Email Address,Date,Time\n";
   appointments.forEach(a => {
     csvContent += `"${a.name}","${a.email}","${a.date}","${a.time}"\n`;
   });
