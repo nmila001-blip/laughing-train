@@ -9,11 +9,12 @@
 
 <style>
 body{font-family:Arial;background:#f4f7fb;margin:0;}
-header{background:#2563eb;color:white;padding:20px;text-align:center;}
+header{background:#2563eb;color:white;text-align:center;padding:20px;}
 .container{max-width:800px;margin:20px auto;}
-.card{background:white;padding:20px;border-radius:15px;}
-.appointment{padding:10px;border-bottom:1px solid #eee;}
+.card{background:white;padding:15px;border-radius:12px;margin-bottom:10px;}
+.app{padding:10px;border-bottom:1px solid #eee;}
 button{background:red;color:white;border:none;padding:5px;border-radius:5px;}
+input{padding:10px;width:100%;margin-bottom:10px;}
 </style>
 </head>
 
@@ -24,58 +25,68 @@ button{background:red;color:white;border:none;padding:5px;border-radius:5px;}
 </header>
 
 <div class="container">
-<div class="card">
 
-<input id="search" placeholder="Search">
+<!-- 📅 CALENDAR FILTER -->
+<div class="card">
+  <h3>Filter by Date</h3>
+  <input type="date" id="filterDate" onchange="render()">
+</div>
+
+<div class="card">
+  <input id="search" placeholder="Search name/email">
+</div>
 
 <div id="list"></div>
 
-</div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
 const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
-if (!window.supabase) alert("Supabase failed to load");
-
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const list = document.getElementById("list");
-const search = document.getElementById("search");
+let data = [];
 
-let dataCache = [];
-
-async function load() {
-  const { data, error } = await client
+async function load(){
+  const { data: res } = await client
     .from("appointments")
     .select("*")
     .order("date");
 
-  if (error) return console.log(error.message);
-
-  dataCache = data;
+  data = res || [];
   render();
 }
 
-function render() {
-  const q = search.value.toLowerCase();
+function render(){
 
-  const filtered = dataCache.filter(a =>
-    a.name.toLowerCase().includes(q) ||
-    a.email.toLowerCase().includes(q)
-  );
+  const q = search.value.toLowerCase();
+  const d = filterDate.value;
+
+  let filtered = data;
+
+  if(q){
+    filtered = filtered.filter(a =>
+      a.name.toLowerCase().includes(q) ||
+      a.email.toLowerCase().includes(q)
+    );
+  }
+
+  if(d){
+    filtered = filtered.filter(a => a.date === d);
+  }
 
   list.innerHTML = "";
 
   filtered.forEach(a => {
+
     const div = document.createElement("div");
-    div.className = "appointment";
+    div.className = "card app";
 
     div.innerHTML = `
       <b>${a.name}</b><br>
       ${a.email}<br>
-      ${a.date} ${a.time}
+      ${a.date} ${a.time}<br><br>
       <button>Delete</button>
     `;
 
@@ -90,16 +101,16 @@ function render() {
 
 search.addEventListener("input", render);
 
-load();
-
-// realtime
-client.channel("db")
+// realtime updates
+client.channel("live")
 .on("postgres_changes", {
-  event: "*",
-  schema: "public",
-  table: "appointments"
+  event:"*",
+  schema:"public",
+  table:"appointments"
 }, load)
 .subscribe();
+
+load();
 </script>
 
 </body>
