@@ -3,17 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Booking</title>
+
+<title>Book Appointment</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;background:#f4f7fb;margin:0;}
-header{background:#2563eb;color:white;text-align:center;padding:20px;}
-.container{max-width:500px;margin:30px auto;background:white;padding:20px;border-radius:12px;}
-input,button{width:100%;padding:10px;margin:8px 0;}
-button{background:#2563eb;color:white;border:none;border-radius:8px;}
-.card{padding:10px;margin-bottom:10px;}
+body{
+  font-family:Arial;
+  background:#f4f7fb;
+  margin:0;
+}
+
+header{
+  background:#2563eb;
+  color:white;
+  text-align:center;
+  padding:20px;
+}
+
+.container{
+  max-width:500px;
+  margin:30px auto;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+}
+
+button{
+  background:#2563eb;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+.msg{
+  text-align:center;
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -25,19 +60,14 @@ button{background:#2563eb;color:white;border:none;border-radius:8px;}
 
 <div class="container">
 
-<div class="card">
-  <input id="name" placeholder="Name">
-  <input id="email" placeholder="Email">
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email">
+<input id="date" type="date">
+<input id="time" type="time">
 
-  <!-- 📅 CALENDAR -->
-  <input type="date" id="date">
+<button onclick="book()">Submit</button>
 
-  <input type="time" id="time">
-
-  <button onclick="book()">Submit</button>
-</div>
-
-<p id="msg"></p>
+<p id="msg" class="msg"></p>
 
 </div>
 
@@ -53,21 +83,37 @@ document.getElementById("date").min =
 
 async function book(){
 
-  const data = {
-    name: name.value,
-    email: email.value,
-    date: date.value,
-    time: time.value
-  };
+  const msg = document.getElementById("msg");
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+
+  // ✅ HARD VALIDATION (fixes your error)
+  if (!name || !email || !date || !time) {
+    msg.innerText = "❌ Please fill all fields.";
+    return;
+  }
 
   const { error } = await client
     .from("appointments")
-    .insert([data]);
+    .insert([{
+      name,
+      email,
+      date,
+      time
+    }]);
 
-  if(error){
-    msg.innerText = error.message;
+  if (error) {
+    msg.innerText = "❌ " + error.message;
   } else {
-    msg.innerText = "Booked successfully!";
+    msg.innerText = "✅ Appointment booked!";
+    
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("time").value = "";
   }
 }
 </script>
