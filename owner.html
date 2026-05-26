@@ -1,223 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Owner Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
-}
-
-body{
-  background:#f4f7fb;
-}
-
-header{
-  background:#2563eb;
-  color:white;
-  padding:25px;
-  text-align:center;
-}
-
-.container{
-  max-width:1000px;
-  margin:30px auto;
-  padding:20px;
-}
-
-.card{
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.08);
-}
-
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:20px;
-}
-
-input{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-.btn{
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.primary{
-  background:#2563eb;
-  color:white;
-}
-
-.danger{
-  background:#dc2626;
-  color:white;
-}
-
-.appointment{
-  background:#eff6ff;
-  border-left:5px solid #2563eb;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.empty{
-  text-align:center;
-  color:#666;
-  padding:30px;
-}
+body{font-family:Arial;background:#f4f7fb;margin:0;}
+header{background:#2563eb;color:white;padding:20px;text-align:center;}
+.container{max-width:800px;margin:20px auto;}
+.card{background:white;padding:20px;border-radius:15px;}
+.appointment{padding:10px;border-bottom:1px solid #eee;}
+button{background:red;color:white;border:none;padding:5px;border-radius:5px;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Imaginary Clinic</h1>
-  <p>Owner Dashboard</p>
+  <h2>Owner Dashboard</h2>
 </header>
 
 <div class="container">
-
 <div class="card">
 
-<div class="controls">
-  <input type="text" id="searchBar" placeholder="Search patient..." />
-  <a href="index.html">
-    <button class="btn primary">Back Home</button>
-  </a>
-</div>
+<input id="search" placeholder="Search">
 
-<div id="appointmentsList"></div>
+<div id="list"></div>
 
 </div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
-const client = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+if (!window.supabase) alert("Supabase failed to load");
 
-const appointmentsList = document.getElementById("appointmentsList");
-const searchBar = document.getElementById("searchBar");
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let appointments = [];
+const list = document.getElementById("list");
+const search = document.getElementById("search");
 
-async function fetchAppointments(){
+let dataCache = [];
 
+async function load() {
   const { data, error } = await client
     .from("appointments")
     .select("*")
-    .order("date", { ascending:true })
-    .order("time", { ascending:true });
+    .order("date");
 
-  if(error){
-    console.error(error.message);
-    return;
-  }
+  if (error) return console.log(error.message);
 
-  appointments = data || [];
-  renderAppointments();
+  dataCache = data;
+  render();
 }
 
-function renderAppointments(){
+function render() {
+  const q = search.value.toLowerCase();
 
-  const query = searchBar.value.toLowerCase();
-
-  const filtered = appointments.filter(appt =>
-    (appt.name || "").toLowerCase().includes(query) ||
-    (appt.email || "").toLowerCase().includes(query)
+  const filtered = dataCache.filter(a =>
+    a.name.toLowerCase().includes(q) ||
+    a.email.toLowerCase().includes(q)
   );
 
-  if(filtered.length === 0){
-    appointmentsList.innerHTML =
-      '<p class="empty">No appointments found.</p>';
-    return;
-  }
+  list.innerHTML = "";
 
-  appointmentsList.innerHTML = "";
-
-  filtered.forEach(appt => {
-
+  filtered.forEach(a => {
     const div = document.createElement("div");
-
     div.className = "appointment";
 
     div.innerHTML = `
-      <div>
-        <h3>${appt.name}</h3>
-        <p>${appt.email}</p>
-        <p>${appt.date} at ${appt.time}</p>
-      </div>
-
-      <button class="btn danger">
-        Delete
-      </button>
+      <b>${a.name}</b><br>
+      ${a.email}<br>
+      ${a.date} ${a.time}
+      <button>Delete</button>
     `;
 
-    const deleteBtn = div.querySelector("button");
+    div.querySelector("button").onclick = async () => {
+      await client.from("appointments").delete().eq("id", a.id);
+      load();
+    };
 
-    deleteBtn.addEventListener("click", async () => {
-
-      if(!confirm("Delete appointment?")) return;
-
-      const { error } = await client
-        .from("appointments")
-        .delete()
-        .eq("id", appt.id);
-
-      if(error){
-        alert(error.message);
-      }else{
-        fetchAppointments();
-      }
-    });
-
-    appointmentsList.appendChild(div);
+    list.appendChild(div);
   });
 }
 
-searchBar.addEventListener("input", renderAppointments);
+search.addEventListener("input", render);
 
-fetchAppointments();
+load();
 
-client
-.channel("appointments-channel")
-.on(
-  "postgres_changes",
-  {
-    event:"*",
-    schema:"public",
-    table:"appointments"
-  },
-  () => {
-    fetchAppointments();
-  }
-)
+// realtime
+client.channel("db")
+.on("postgres_changes", {
+  event: "*",
+  schema: "public",
+  table: "appointments"
+}, load)
 .subscribe();
 </script>
 
