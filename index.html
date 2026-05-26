@@ -3,64 +3,77 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Welcome - Imaginary Clinic</title>
+<title>Imaginary Clinic</title>
+
 <style>
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
 }
+
 body{
   background:#f4f7fb;
-  color:#333;
+  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
+  padding:20px;
 }
+
 .portal-card{
   background:white;
-  padding:40px;
-  border-radius:15px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.1);
-  text-align:center;
-  max-width:500px;
   width:100%;
+  max-width:500px;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  text-align:center;
 }
+
 h1{
   color:#2563eb;
   margin-bottom:10px;
 }
+
 p{
   color:#666;
   margin-bottom:30px;
 }
+
 .choices{
   display:flex;
-  gap:15px;
   flex-direction:column;
+  gap:15px;
 }
+
 .portal-btn{
-  display:block;
+  text-decoration:none;
   padding:15px;
   border-radius:10px;
-  text-decoration:none;
   font-weight:bold;
-  font-size:16px;
-  transition:background 0.2s, color 0.2s;
+  transition:0.2s;
 }
+
+.portal-btn:hover{
+  transform:translateY(-2px);
+}
+
 .patient-link{
   background:#2563eb;
   color:white;
 }
+
 .patient-link:hover{
   background:#1e40af;
 }
+
 .owner-link{
   background:#e5e7eb;
   color:#374151;
 }
+
 .owner-link:hover{
   background:#d1d5db;
 }
@@ -70,11 +83,16 @@ p{
 
 <div class="portal-card">
   <h1>Imaginary Clinic</h1>
-  <p>Please select your portal to continue</p>
-  
+  <p>Select your portal</p>
+
   <div class="choices">
-    <a href="user.html" class="portal-btn patient-link">Patient Booking Portal</a>
-    <a href="owner.html" class="portal-btn owner-link">Owner Dashboard</a>
+    <a href="user.html" class="portal-btn patient-link">
+      Patient Booking Portal
+    </a>
+
+    <a href="owner.html" class="portal-btn owner-link">
+      Owner Dashboard
+    </a>
   </div>
 </div>
 
