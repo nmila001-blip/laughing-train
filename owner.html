@@ -3,230 +3,98 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Owner Dashboard - Imaginary Clinic</title>
-<!-- Load Supabase Library CDN -->
-<script src="https://jsdelivr.net"></script>
+<title>Imaginary Clinic</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
-body{background:#f4f7fb;color:#333;}
-header{background:#2563eb;color:white;padding:25px;text-align:center;}
-.container{max-width:1000px;margin:30px auto;padding:20px;}
-.card{background:white;padding:25px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.08);margin-bottom:25px;}
-h2{color:#2563eb;margin-bottom:15px;}
-.top-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px;justify-content:center;}
-.btn{border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:bold;text-decoration:none;display:inline-block;}
-.primary{background:#2563eb;color:white;}
-.primary:hover{background:#1e40af;}
-.success{background:#10b981;color:white;}
-.success:hover{background:#047857;}
-.danger{background:#dc2626;color:white;}
-.danger:hover{background:#991b1b;}
-.logout{background:white;color:#2563eb;}
-.logout:hover{background:#dbeafe;}
-.admin-tools {display: flex;gap: 15px;flex-wrap: wrap;margin-bottom: 20px;background: #f8fafc;padding: 15px;border-radius: 10px;border: 1px solid #e2e8f0;align-items: center;}
-.search-input {flex: 2;min-width: 200px;}
-.date-input {flex: 1;min-width: 150px;}
-.appointment{background:#eff6ff;padding:15px;border-radius:10px;margin-bottom:15px;border-left:5px solid #2563eb;display: flex;justify-content: space-between;align-items: center;}
-.appointment h3{margin-bottom:8px;}
-.appointment p{margin:4px 0;}
-.empty{text-align:center;color:#666;padding:20px 0;}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-input{padding:12px;border-radius:10px;border:1px solid #ccc;}
-.note{background:#fef3c7;color:#92400e;padding:12px;border-radius:10px;margin-bottom:20px;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f4f7fb;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.portal-card{
+  background:white;
+  width:100%;
+  max-width:500px;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+h1{
+  color:#2563eb;
+  margin-bottom:10px;
+}
+
+p{
+  color:#666;
+  margin-bottom:30px;
+}
+
+.choices{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.portal-btn{
+  text-decoration:none;
+  padding:15px;
+  border-radius:10px;
+  font-weight:bold;
+  transition:0.2s;
+}
+
+.portal-btn:hover{
+  transform:translateY(-2px);
+}
+
+.patient-link{
+  background:#2563eb;
+  color:white;
+}
+
+.patient-link:hover{
+  background:#1e40af;
+}
+
+.owner-link{
+  background:#e5e7eb;
+  color:#374151;
+}
+
+.owner-link:hover{
+  background:#d1d5db;
+}
 </style>
 </head>
 <body>
 
-<header>
+<div class="portal-card">
   <h1>Imaginary Clinic</h1>
-  <p>Owner Appointment Dashboard</p>
-  <div class="top-actions">
-    <a class="btn logout" href="index.html">Back to Main Portal</a>
-    <button class="btn danger" id="clearAllBtn" style="display:none;">Clear All Appointments</button>
-  </div>
-</header>
+  <p>Select your portal</p>
 
-<div class="container">
-  <!-- Owner Login -->
-  <div class="card" id="loginCard">
-    <h2>Owner Login</h2>
-    <div class="note">
-      Please enter your admin credentials to open your automated tracking terminal.
-    </div>
-    <div class="controls">
-      <input type="email" id="ownerEmail" placeholder="Owner Email" style="min-width:240px;" />
-      <input type="password" id="ownerPassword" placeholder="Password" style="min-width:240px;" />
-      <button class="btn primary" id="loginBtn">Login</button>
-    </div>
-    <p id="loginMsg" style="margin-top:12px;color:red;display:none;">Incorrect email or password.</p>
-  </div>
+  <div class="choices">
+    <a href="user.html" class="portal-btn patient-link">
+      Patient Booking Portal
+    </a>
 
-  <!-- Main Management View -->
-  <div class="card" id="dashboardCard" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h2>Appointments Management</h2>
-      <button class="btn primary" id="manualRefreshBtn" style="padding: 8px 12px; font-size: 13px;">🔄 Refresh List</button>
-    </div>
-    
-    <div class="admin-tools">
-      <input type="text" id="searchBar" class="search-input" placeholder="🔍 Optional: Search by Name or Email..." />
-      <input type="date" id="dateFilter" class="date-input" title="Filter by Date" />
-      <button class="btn success" id="exportBtn">📊 Export to Excel/CSV</button>
-    </div>
-
-    <div id="appointmentsList"></div>
+    <a href="owner.html" class="portal-btn owner-link">
+      Owner Dashboard
+    </a>
   </div>
 </div>
 
-<script>
-// Hardcoded Owner Credentials
-const OWNER_EMAIL = "nmila001@doral.colegia.org";
-const OWNER_PASSWORD = "05222014nm";
-
-// Core Supabase Connection Configuration
-const SUPABASE_URL = "https://supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
-
-let supabaseClientInstance = null;
-let appointments = [];
-let autoRefreshTimer = null;
-
-// DOM Element Selections
-const loginBtn = document.getElementById("loginBtn");
-const loginMsg = document.getElementById("loginMsg");
-const loginCard = document.getElementById("loginCard");
-const dashboardCard = document.getElementById("dashboardCard");
-const appointmentsList = document.getElementById("appointmentsList");
-const clearAllBtn = document.getElementById("clearAllBtn");
-const searchBar = document.getElementById("searchBar");
-const dateFilter = document.getElementById("dateFilter");
-const exportBtn = document.getElementById("exportBtn");
-const manualRefreshBtn = document.getElementById("manualRefreshBtn");
-
-// Initialize client right away to ensure variables are defined before click execution
-try {
-  supabaseClientInstance = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-} catch (err) {
-  alert("Supabase script failed to load. Check internet link: " + err.message);
-}
-
-loginBtn.addEventListener("click", () => {
-  const enteredEmail = document.getElementById("ownerEmail").value.trim();
-  const enteredPassword = document.getElementById("ownerPassword").value.trim();
-
-  // Match against exact string keys
-  if (enteredEmail === OWNER_EMAIL && enteredPassword === OWNER_PASSWORD) {
-    loginMsg.style.display = "none";
-    loginCard.style.display = "none";
-    dashboardCard.style.display = "block";
-    clearAllBtn.style.display = "inline-block";
-
-    // Trigger instant content display
-    fetchAppointments();
-    
-    // Clear any loose old timers and assign a fresh 2-second reload loop
-    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-    autoRefreshTimer = setInterval(fetchAppointments, 2000);
-  } else {
-    loginMsg.style.display = "block";
-    dashboardCard.style.display = "none";
-  }
-});
-
-async function fetchAppointments() {
-  if (!supabaseClientInstance) return;
-
-  try {
-    const { data, error } = await supabaseClientInstance
-      .from('appointments')
-      .select('*')
-      .order('date', { ascending: true })
-      .order('time', { ascending: true });
-
-    if (error) {
-      console.error("Fetch failure error code: ", error.message);
-      return;
-    }
-    
-    // Prevent UI redraw flashing by checking stringified values
-    if (JSON.stringify(appointments) !== JSON.stringify(data)) {
-      appointments = data || [];
-      renderAppointments();
-    }
-  } catch (err) {
-    console.error("Network loop error: ", err.message);
-  }
-}
-
-function renderAppointments() {
-  const searchQuery = searchBar.value.toLowerCase();
-  const targetDate = dateFilter.value;
-
-  const filteredAppointments = appointments.filter(appt => {
-    const matchesSearch = !searchQuery || 
-                          (appt.name || '').toLowerCase().includes(searchQuery) || 
-                          (appt.email || '').toLowerCase().includes(searchQuery);
-    const matchesDate = !targetDate || appt.date === targetDate;
-    return matchesSearch && matchesDate;
-  });
-
-  if (filteredAppointments.length === 0) {
-    appointmentsList.innerHTML = '<p class="empty">No appointments found.</p>';
-    return;
-  }
-
-  appointmentsList.innerHTML = "";
-
-  filteredAppointments.forEach((appt) => {
-    const div = document.createElement("div");
-    div.className = "appointment";
-    div.innerHTML = `
-      <div>
-        <h3>${appt.name || 'Anonymous'}</h3>
-        <p><strong>Email:</strong> ${appt.email || 'None'}</p>
-        <p><strong>Date:</strong> ${appt.date || 'None'}</p>
-        <p><strong>Time:</strong> ${appt.time || 'None'}</p>
-      </div>
-      <button class="btn danger" onclick="deleteAppointment(${appt.id})">Delete</button>
-    `;
-    appointmentsList.appendChild(div);
-  });
-}
-
-searchBar.addEventListener("input", renderAppointments);
-dateFilter.addEventListener("change", renderAppointments);
-manualRefreshBtn.addEventListener("click", fetchAppointments);
-
-window.deleteAppointment = async function(id) {
-  if (confirm("Delete this appointment permanently?")) {
-    const { error } = await supabaseClientInstance.from('appointments').delete().eq('id', id);
-    if (error) alert("Could not delete record: " + error.message);
-    else fetchAppointments();
-  }
-};
-
-clearAllBtn.addEventListener("click", async () => {
-  if (appointments.length === 0) return;
-  if (confirm("Are you absolutely sure you want to delete ALL appointments?")) {
-    const { error } = await supabaseClientInstance.from('appointments').delete().neq('id', 0);
-    if (error) alert("Could not clear records: " + error.message);
-    else fetchAppointments();
-  }
-});
-
-exportBtn.addEventListener("click", () => {
-  if (appointments.length === 0) return alert("No layout data to export.");
-  let csvContent = "data:text/csv;charset=utf-8,Patient Name,Email Address,Date,Time\n";
-  appointments.forEach(a => {
-    csvContent += `"${a.name || ''}","${a.email || ''}","${a.date || ''}","${a.time || ''}"\n`;
-  });
-  const link = document.createElement("a");
-  link.setAttribute("href", encodeURI(csvContent));
-  link.setAttribute("download", "clinic_schedule.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-});
-</script>
 </body>
 </html>
