@@ -61,11 +61,10 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;}
 </div>
 
 <script>
-// Target Core Parameters
-const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_URL = "https://supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
-// Establish Database Engine Reference Instance
+// Create instance connection
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
@@ -83,7 +82,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     .insert([newAppointment]);
 
   if (error) {
-    alert("Database Connection Error: " + error.message + "\n\n(Ensure you created the table inside Supabase Dashboard!)");
+    alert("Error sending to database: " + error.message);
   } else {
     document.getElementById('bookingForm').reset();
     const success = document.getElementById('successMsg');
