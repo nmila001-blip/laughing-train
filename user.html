@@ -3,97 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Book Appointment</title>
+<title>User Booking</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  font-family:Arial;
-  background:#f4f7fb;
-  margin:0;
-  padding:0;
-}
-
-header{
-  background:#2563eb;
-  color:white;
-  text-align:center;
-  padding:20px;
-}
-
-.container{
-  max-width:500px;
-  margin:40px auto;
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.1);
-}
-
-h2{
-  color:#2563eb;
-  margin-bottom:15px;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-  border:1px solid #ccc;
-  outline:none;
-}
-
-button{
-  width:100%;
-  padding:12px;
-  background:#2563eb;
-  color:white;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-  margin-top:10px;
-}
-
-button:hover{
-  background:#1e40af;
-}
-
-.msg{
-  margin-top:10px;
-  text-align:center;
-  font-weight:bold;
-}
-
-.success{ color:green; }
-.error{ color:red; }
+body{font-family:Arial;background:#f4f7fb;margin:0;}
+header{background:#2563eb;color:white;text-align:center;padding:20px;}
+.container{max-width:500px;margin:30px auto;background:white;padding:20px;border-radius:12px;}
+input,button{width:100%;padding:10px;margin:8px 0;}
+button{background:#2563eb;color:white;border:none;border-radius:8px;}
+.card{padding:10px;margin-bottom:10px;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Imaginary Clinic</h1>
-  <p>Book Your Appointment</p>
+  <h2>Book Appointment</h2>
 </header>
 
 <div class="container">
 
-<h2>Appointment Form</h2>
+<div class="card">
+  <input id="name" placeholder="Name">
+  <input id="email" placeholder="Email">
 
-<form id="form">
-  <input type="text" id="name" placeholder="Full Name" required>
-  <input type="email" id="email" placeholder="Email" required>
-  <input type="date" id="date" required>
-  <input type="time" id="time" required>
+  <!-- 📅 CALENDAR -->
+  <input type="date" id="date">
 
-  <button id="submitBtn">Book Appointment</button>
-</form>
+  <input type="time" id="time">
 
-<div id="msg" class="msg"></div>
+  <button onclick="book()">Submit</button>
+</div>
+
+<p id="msg"></p>
 
 </div>
 
@@ -101,63 +45,31 @@ button:hover{
 const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
 const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
 
-// safety check
-if (!window.supabase) {
-  alert("Supabase failed to load. Check internet or CDN.");
-}
-
-const client = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-const form = document.getElementById("form");
-const msg = document.getElementById("msg");
-const btn = document.getElementById("submitBtn");
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // prevent past dates
 document.getElementById("date").min =
   new Date().toISOString().split("T")[0];
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+async function book(){
 
-  msg.textContent = "";
-  msg.className = "msg";
-
-  const appointment = {
-    name: document.getElementById("name").value.trim(),
-    email: document.getElementById("email").value.trim(),
-    date: document.getElementById("date").value,
-    time: document.getElementById("time").value
+  const data = {
+    name: name.value,
+    email: email.value,
+    date: date.value,
+    time: time.value
   };
-
-  // simple validation
-  if (!appointment.name || !appointment.email) {
-    msg.textContent = "Please fill all fields.";
-    msg.classList.add("error");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = "Booking...";
 
   const { error } = await client
     .from("appointments")
-    .insert([appointment]);
+    .insert([data]);
 
-  if (error) {
-    msg.textContent = "Error: " + error.message;
-    msg.classList.add("error");
+  if(error){
+    msg.innerText = error.message;
   } else {
-    msg.textContent = "Appointment booked successfully!";
-    msg.classList.add("success");
-    form.reset();
+    msg.innerText = "Booked successfully!";
   }
-
-  btn.disabled = false;
-  btn.textContent = "Book Appointment";
-});
+}
 </script>
 
 </body>
