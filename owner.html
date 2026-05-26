@@ -4,40 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Owner Dashboard</title>
+<title>GLP-1 Booking Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
   font-family:Arial;
-  background:#f4f7fb;
+  background:#f6f7fb;
   margin:0;
 }
 
 header{
-  background:#2563eb;
+  background:#111827;
   color:white;
   padding:20px;
   text-align:center;
   position:relative;
 }
 
-.home{
-  position:absolute;
-  left:10px;
-  top:10px;
-  background:white;
-  color:#2563eb;
-  border:none;
-  padding:8px 12px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
 .container{
-  max-width:800px;
+  max-width:900px;
   margin:20px auto;
 }
 
@@ -46,16 +33,42 @@ header{
   padding:15px;
   border-radius:10px;
   margin-bottom:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+button{
+  cursor:pointer;
 }
 
 .delete{
-  background:red;
+  background:#ef4444;
   color:white;
   border:none;
   padding:6px 10px;
   border-radius:6px;
-  cursor:pointer;
+}
+
+#loginBox{
+  max-width:400px;
+  margin:80px auto;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+
+.primary{
+  background:#111827;
+  color:white;
+  border:none;
+  width:100%;
+  padding:10px;
+  border-radius:8px;
 }
 </style>
 </head>
@@ -63,48 +76,81 @@ header{
 <body>
 
 <header>
-<a href="index.html"><button class="home">🏠 Home</button></a>
-<h2>Appointments</h2>
+<h2>GLP-1 Client Dashboard</h2>
 </header>
 
-<div class="container" id="list"></div>
+<!-- LOGIN -->
+<div id="loginBox">
+  <h3>Owner Login</h3>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="primary" onclick="login()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="container" id="dashboard" style="display:none;">
+  <div id="list"></div>
+</div>
 
 <script>
-const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
-const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+const client = supabase.createClient(
+  "https://fsbpbnurfbubflszjmas.supabase.co",
+  "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
+);
 
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// LOGIN
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-let data = [];
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
 
-async function load(){
-  try {
-    const { data: res, error } = await client
-      .from("appointments")
-      .select("*")
-      .order("date", { ascending: true })
-      .order("time", { ascending: true });
+  if(error){
+    alert(error.message);
+    return;
+  }
 
-    if (error) {
-      console.error("Supabase error:", error.message);
-      return;
-    }
+  showDashboard();
+  load();
+}
 
-    data = res || [];
-    render();
+// SESSION CHECK
+async function check(){
+  const { data } = await client.auth.getSession();
 
-  } catch (err) {
-    console.error("Network error:", err.message);
+  if(data.session){
+    showDashboard();
+    load();
   }
 }
 
-function render(){
+function showDashboard(){
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+}
+
+// LOAD BOOKINGS
+async function load(){
+
+  const { data, error } = await client
+    .from("appointments")
+    .select("*")
+    .order("date", { ascending:true })
+    .order("time", { ascending:true });
+
+  if(error){
+    console.log(error.message);
+    return;
+  }
 
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if(!data || data.length === 0){
-    list.innerHTML = "<p>No appointments yet.</p>";
+  if(!data.length){
+    list.innerHTML = "<p>No bookings yet.</p>";
     return;
   }
 
@@ -114,10 +160,10 @@ function render(){
     div.className = "card";
 
     div.innerHTML = `
-      <b>${a.name || "No name"}</b><br>
-      ${a.email || ""}<br>
-      ${a.date || ""} ${a.time || ""}<br><br>
-      <button class="delete">Delete</button>
+      <b>${a.name}</b><br>
+      ${a.email}<br>
+      <b>${a.date}</b> at <b>${a.time}</b><br><br>
+      <button class="delete">Remove</button>
     `;
 
     div.querySelector(".delete").onclick = async () => {
@@ -129,18 +175,7 @@ function render(){
   });
 }
 
-// realtime updates
-client
-  .channel("live")
-  .on("postgres_changes", {
-    event: "*",
-    schema: "public",
-    table: "appointments"
-  }, load)
-  .subscribe();
-
-// initial load
-load();
+check();
 </script>
 
 </body>
