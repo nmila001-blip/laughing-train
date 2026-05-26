@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Imaginary Clinic</title>
+
+<title>Owner Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{
@@ -15,86 +18,208 @@
 
 body{
   background:#f4f7fb;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
 }
 
-.portal-card{
-  background:white;
-  width:100%;
-  max-width:500px;
-  padding:40px;
-  border-radius:16px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+header{
+  background:#2563eb;
+  color:white;
+  padding:25px;
   text-align:center;
 }
 
-h1{
-  color:#2563eb;
-  margin-bottom:10px;
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  padding:20px;
 }
 
-p{
-  color:#666;
-  margin-bottom:30px;
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-.choices{
+.controls{
   display:flex;
-  flex-direction:column;
-  gap:15px;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
 }
 
-.portal-btn{
-  text-decoration:none;
-  padding:15px;
+input{
+  padding:12px;
   border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.btn{
+  border:none;
+  padding:12px 18px;
+  border-radius:10px;
+  cursor:pointer;
   font-weight:bold;
-  transition:0.2s;
 }
 
-.portal-btn:hover{
-  transform:translateY(-2px);
-}
-
-.patient-link{
+.primary{
   background:#2563eb;
   color:white;
 }
 
-.patient-link:hover{
-  background:#1e40af;
+.danger{
+  background:#dc2626;
+  color:white;
 }
 
-.owner-link{
-  background:#e5e7eb;
-  color:#374151;
+.appointment{
+  background:#eff6ff;
+  border-left:5px solid #2563eb;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.owner-link:hover{
-  background:#d1d5db;
+.empty{
+  text-align:center;
+  color:#666;
+  padding:30px;
 }
 </style>
 </head>
+
 <body>
 
-<div class="portal-card">
+<header>
   <h1>Imaginary Clinic</h1>
-  <p>Select your portal</p>
+  <p>Owner Dashboard</p>
+</header>
 
-  <div class="choices">
-    <a href="user.html" class="portal-btn patient-link">
-      Patient Booking Portal
-    </a>
+<div class="container">
 
-    <a href="owner.html" class="portal-btn owner-link">
-      Owner Dashboard
-    </a>
-  </div>
+<div class="card">
+
+<div class="controls">
+  <input type="text" id="searchBar" placeholder="Search patient..." />
+  <a href="index.html">
+    <button class="btn primary">Back Home</button>
+  </a>
 </div>
+
+<div id="appointmentsList"></div>
+
+</div>
+</div>
+
+<script>
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const appointmentsList = document.getElementById("appointmentsList");
+const searchBar = document.getElementById("searchBar");
+
+let appointments = [];
+
+async function fetchAppointments(){
+
+  const { data, error } = await client
+    .from("appointments")
+    .select("*")
+    .order("date", { ascending:true })
+    .order("time", { ascending:true });
+
+  if(error){
+    console.error(error.message);
+    return;
+  }
+
+  appointments = data || [];
+  renderAppointments();
+}
+
+function renderAppointments(){
+
+  const query = searchBar.value.toLowerCase();
+
+  const filtered = appointments.filter(appt =>
+    (appt.name || "").toLowerCase().includes(query) ||
+    (appt.email || "").toLowerCase().includes(query)
+  );
+
+  if(filtered.length === 0){
+    appointmentsList.innerHTML =
+      '<p class="empty">No appointments found.</p>';
+    return;
+  }
+
+  appointmentsList.innerHTML = "";
+
+  filtered.forEach(appt => {
+
+    const div = document.createElement("div");
+
+    div.className = "appointment";
+
+    div.innerHTML = `
+      <div>
+        <h3>${appt.name}</h3>
+        <p>${appt.email}</p>
+        <p>${appt.date} at ${appt.time}</p>
+      </div>
+
+      <button class="btn danger">
+        Delete
+      </button>
+    `;
+
+    const deleteBtn = div.querySelector("button");
+
+    deleteBtn.addEventListener("click", async () => {
+
+      if(!confirm("Delete appointment?")) return;
+
+      const { error } = await client
+        .from("appointments")
+        .delete()
+        .eq("id", appt.id);
+
+      if(error){
+        alert(error.message);
+      }else{
+        fetchAppointments();
+      }
+    });
+
+    appointmentsList.appendChild(div);
+  });
+}
+
+searchBar.addEventListener("input", renderAppointments);
+
+fetchAppointments();
+
+client
+.channel("appointments-channel")
+.on(
+  "postgres_changes",
+  {
+    event:"*",
+    schema:"public",
+    table:"appointments"
+  },
+  () => {
+    fetchAppointments();
+  }
+)
+.subscribe();
+</script>
 
 </body>
 </html>
