@@ -1,32 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Book Appointment</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;background:#f4f7fb;}
-.container{max-width:500px;margin:40px auto;background:white;padding:20px;border-radius:12px;}
-input,button{width:100%;padding:10px;margin:8px 0;}
-button{background:#2563eb;color:white;border:none;border-radius:8px;}
-.home{background:#e5e7eb;color:black;}
+body{
+  font-family:Arial;
+  background:#f4f7fb;
+  margin:0;
+}
+
+header{
+  background:#2563eb;
+  color:white;
+  text-align:center;
+  padding:20px;
+}
+
+.container{
+  max-width:600px;
+  margin:20px auto;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+
+button{
+  cursor:pointer;
+}
+
+.slot-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+.slot{
+  padding:10px;
+  border:1px solid #2563eb;
+  border-radius:8px;
+  background:white;
+}
+
+.slot.selected{
+  background:#2563eb;
+  color:white;
+}
+
+.slot.disabled{
+  background:#ccc;
+  color:#666;
+  cursor:not-allowed;
+}
+
+.submit{
+  width:100%;
+  padding:12px;
+  margin-top:15px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+
+.home{
+  background:#e5e7eb;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  width:100%;
+  margin-bottom:10px;
+}
 </style>
 </head>
 
 <body>
 
+<header>
+<h2>Book Appointment</h2>
+</header>
+
 <div class="container">
 
 <a href="index.html"><button class="home">🏠 Home</button></a>
 
-<h2>Book Appointment</h2>
-
 <input id="name" placeholder="Name">
 <input id="email" placeholder="Email">
-<input type="date" id="date">
-<input type="time" id="time">
 
-<button onclick="book()">Submit</button>
+<input type="date" id="date">
+
+<h3>Select Time Slot</h3>
+<div class="slot-grid" id="slots"></div>
+
+<button class="submit" onclick="book()">Book Appointment</button>
 
 <p id="msg"></p>
 
@@ -38,27 +116,66 @@ const client = supabase.createClient(
 "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
 );
 
+let selectedTime = "";
+
+// prevent past dates
 document.getElementById("date").min =
 new Date().toISOString().split("T")[0];
 
-async function book(){
+// 30 min slots
+const times = [
+"09:00","09:30",
+"10:00","10:30",
+"11:00","11:30",
+"12:00","12:30",
+"13:00","13:30",
+"14:00","14:30",
+"15:00","15:30",
+"16:00","16:30",
+"17:00","17:30"
+];
 
-const name = document.getElementById("name").value.trim();
-const email = document.getElementById("email").value.trim();
-const date = document.getElementById("date").value;
-const time = document.getElementById("time").value;
+function renderSlots(){
+  const container = document.getElementById("slots");
+  container.innerHTML = "";
 
-if(!name || !email || !date || !time){
-document.getElementById("msg").innerText="Fill all fields";
-return;
+  times.forEach(t => {
+    const btn = document.createElement("div");
+    btn.className = "slot";
+    btn.innerText = t;
+
+    btn.onclick = () => {
+      selectedTime = t;
+
+      document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+      btn.classList.add("selected");
+    };
+
+    container.appendChild(btn);
+  });
 }
 
-const { error } = await client.from("appointments").insert([{
-name,email,date,time
-}]);
+renderSlots();
 
-document.getElementById("msg").innerText =
-error ? error.message : "Booked!";
+async function book(){
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const date = document.getElementById("date").value;
+
+  if(!name || !email || !date || !selectedTime){
+    msg.innerText = "Fill all fields + select time";
+    return;
+  }
+
+  const { error } = await client.from("appointments").insert([{
+    name,
+    email,
+    date,
+    time: selectedTime
+  }]);
+
+  msg.innerText = error ? error.message : "Booked!";
 }
 </script>
 
