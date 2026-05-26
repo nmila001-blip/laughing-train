@@ -49,7 +49,7 @@ header{
   box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
-button.delete{
+.delete{
   background:red;
   color:white;
   border:none;
@@ -70,22 +70,32 @@ button.delete{
 <div class="container" id="list"></div>
 
 <script>
-const client = supabase.createClient(
-"https://fsbpbnurfbubflszjmas.supabase.co",
-"sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
-);
+const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let data = [];
 
 async function load(){
-  const { data: res } = await client
-    .from("appointments")
-    .select("*")
-    .order("date", { ascending:true })
-    .order("time", { ascending:true });
+  try {
+    const { data: res, error } = await client
+      .from("appointments")
+      .select("*")
+      .order("date", { ascending: true })
+      .order("time", { ascending: true });
 
-  data = res || [];
-  render();
+    if (error) {
+      console.error("Supabase error:", error.message);
+      return;
+    }
+
+    data = res || [];
+    render();
+
+  } catch (err) {
+    console.error("Network error:", err.message);
+  }
 }
 
 function render(){
@@ -93,7 +103,7 @@ function render(){
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if(data.length === 0){
+  if(!data || data.length === 0){
     list.innerHTML = "<p>No appointments yet.</p>";
     return;
   }
@@ -104,13 +114,13 @@ function render(){
     div.className = "card";
 
     div.innerHTML = `
-      <b>${a.name}</b><br>
-      ${a.email}<br>
-      ${a.date} ${a.time}<br><br>
+      <b>${a.name || "No name"}</b><br>
+      ${a.email || ""}<br>
+      ${a.date || ""} ${a.time || ""}<br><br>
       <button class="delete">Delete</button>
     `;
 
-    div.querySelector("button").onclick = async () => {
+    div.querySelector(".delete").onclick = async () => {
       await client.from("appointments").delete().eq("id", a.id);
       load();
     };
@@ -120,14 +130,16 @@ function render(){
 }
 
 // realtime updates
-client.channel("live")
-.on("postgres_changes", {
-  event:"*",
-  schema:"public",
-  table:"appointments"
-}, load)
-.subscribe();
+client
+  .channel("live")
+  .on("postgres_changes", {
+    event: "*",
+    schema: "public",
+    table: "appointments"
+  }, load)
+  .subscribe();
 
+// initial load
 load();
 </script>
 
