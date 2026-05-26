@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>Owner Dashboard</title>
 
@@ -32,7 +32,7 @@ header{
   padding:15px;
   margin-bottom:10px;
   border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
 input{
@@ -64,8 +64,8 @@ button{
 <body>
 
 <header>
-<h2>Owner Dashboard</h2>
-<a href="index.html" style="color:white;">Home</a>
+  <h2>Owner Dashboard</h2>
+  <a href="index.html" style="color:white;">Home</a>
 </header>
 
 <!-- LOGIN -->
@@ -92,6 +92,8 @@ const loginBox = document.getElementById("loginBox");
 const dashboard = document.getElementById("dashboard");
 const list = document.getElementById("list");
 
+let sessionReady = false;
+
 /* ---------------- LOGIN ---------------- */
 
 async function login(){
@@ -109,7 +111,7 @@ async function login(){
     return;
   }
 
-  showDashboard();
+  showApp();
   await loadAppointments();
 }
 
@@ -120,19 +122,21 @@ async function checkSession(){
   const { data } = await client.auth.getSession();
 
   if(data.session){
-    showDashboard();
+    showApp();
     await loadAppointments();
   }
+
+  sessionReady = true;
 }
 
 /* ---------------- SHOW UI ---------------- */
 
-function showDashboard(){
+function showApp(){
   loginBox.style.display = "none";
   dashboard.style.display = "block";
 }
 
-/* ---------------- LOAD DATA ---------------- */
+/* ---------------- LOAD APPOINTMENTS ---------------- */
 
 async function loadAppointments(){
 
@@ -143,13 +147,13 @@ async function loadAppointments(){
     .order("time", { ascending:true });
 
   if(error){
-    console.log("ERROR:", error.message);
+    console.log(error.message);
     return;
   }
 
   list.innerHTML = "";
 
-  if(!data.length){
+  if(!data || data.length === 0){
     list.innerHTML = "<p>No appointments yet.</p>";
     return;
   }
