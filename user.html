@@ -1,105 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Patient Booking</title>
+<title>Book Appointment</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
+body{
+  font-family:Arial;
+  background:#f4f7fb;
   margin:0;
   padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
-}
-
-body{
-  background:#f4f7fb;
-  color:#333;
 }
 
 header{
   background:#2563eb;
   color:white;
-  padding:25px;
   text-align:center;
-}
-
-.container{
-  max-width:600px;
-  margin:30px auto;
   padding:20px;
 }
 
-.card{
+.container{
+  max-width:500px;
+  margin:40px auto;
   background:white;
   padding:25px;
   border-radius:15px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.08);
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
 h2{
   color:#2563eb;
-  margin-bottom:20px;
-}
-
-.form-group{
   margin-bottom:15px;
-}
-
-label{
-  display:block;
-  margin-bottom:6px;
-  font-weight:bold;
 }
 
 input{
   width:100%;
   padding:12px;
+  margin:8px 0;
   border-radius:10px;
   border:1px solid #ccc;
+  outline:none;
 }
 
-.btn{
+button{
   width:100%;
+  padding:12px;
+  background:#2563eb;
+  color:white;
   border:none;
-  padding:14px;
   border-radius:10px;
-  cursor:pointer;
   font-weight:bold;
+  cursor:pointer;
   margin-top:10px;
 }
 
-.primary{
-  background:#2563eb;
-  color:white;
-}
-
-.primary:hover{
+button:hover{
   background:#1e40af;
 }
 
-.back-btn{
-  background:white;
-  color:#2563eb;
-  border:1px solid #2563eb;
-  text-decoration:none;
-  display:block;
+.msg{
+  margin-top:10px;
   text-align:center;
+  font-weight:bold;
 }
 
-.success-msg{
-  display:none;
-  background:#dcfce7;
-  color:#166534;
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:15px;
-  text-align:center;
-}
+.success{ color:green; }
+.error{ color:red; }
 </style>
 </head>
 
@@ -107,72 +77,53 @@ input{
 
 <header>
   <h1>Imaginary Clinic</h1>
-  <p>Patient Booking Portal</p>
+  <p>Book Your Appointment</p>
 </header>
 
 <div class="container">
-  <div class="card">
 
-    <h2>Schedule Appointment</h2>
+<h2>Appointment Form</h2>
 
-    <div id="successMsg" class="success-msg">
-      Appointment booked successfully!
-    </div>
+<form id="form">
+  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="date" id="date" required>
+  <input type="time" id="time" required>
 
-    <form id="bookingForm">
+  <button id="submitBtn">Book Appointment</button>
+</form>
 
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="name" required />
-      </div>
+<div id="msg" class="msg"></div>
 
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="email" required />
-      </div>
-
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="date" required />
-      </div>
-
-      <div class="form-group">
-        <label>Time</label>
-        <input type="time" id="time" required />
-      </div>
-
-      <button type="submit" class="btn primary">
-        Submit Appointment
-      </button>
-
-      <a href="index.html" class="btn back-btn">
-        Back to Home
-      </a>
-
-    </form>
-  </div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+
+// safety check
+if (!window.supabase) {
+  alert("Supabase failed to load. Check internet or CDN.");
+}
 
 const client = window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  SUPABASE_KEY
 );
 
+const form = document.getElementById("form");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("submitBtn");
+
+// prevent past dates
 document.getElementById("date").min =
   new Date().toISOString().split("T")[0];
-
-const form = document.getElementById("bookingForm");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const submitBtn = document.querySelector("button[type='submit']");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
+  msg.textContent = "";
+  msg.className = "msg";
 
   const appointment = {
     name: document.getElementById("name").value.trim(),
@@ -181,29 +132,31 @@ form.addEventListener("submit", async (e) => {
     time: document.getElementById("time").value
   };
 
-  try{
-    const { error } = await client
-      .from("appointments")
-      .insert([appointment]);
-
-    if(error){
-      alert(error.message);
-    }else{
-      form.reset();
-
-      const msg = document.getElementById("successMsg");
-      msg.style.display = "block";
-
-      setTimeout(() => {
-        msg.style.display = "none";
-      }, 4000);
-    }
-  }catch(err){
-    alert(err.message);
+  // simple validation
+  if (!appointment.name || !appointment.email) {
+    msg.textContent = "Please fill all fields.";
+    msg.classList.add("error");
+    return;
   }
 
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Submit Appointment";
+  btn.disabled = true;
+  btn.textContent = "Booking...";
+
+  const { error } = await client
+    .from("appointments")
+    .insert([appointment]);
+
+  if (error) {
+    msg.textContent = "Error: " + error.message;
+    msg.classList.add("error");
+  } else {
+    msg.textContent = "Appointment booked successfully!";
+    msg.classList.add("success");
+    form.reset();
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Book Appointment";
 });
 </script>
 
