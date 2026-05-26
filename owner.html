@@ -1,20 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Owner Dashboard</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;background:#f4f7fb;}
-header{background:#2563eb;color:white;padding:20px;position:relative;}
-.container{max-width:800px;margin:20px auto;}
-.card{background:white;padding:15px;margin-bottom:10px;border-radius:10px;}
-input{width:100%;padding:10px;margin:5px 0;}
-button{background:red;color:white;border:none;padding:5px;border-radius:6px;}
+body{
+  font-family:Arial;
+  background:#f4f7fb;
+  margin:0;
+}
+
+header{
+  background:#2563eb;
+  color:white;
+  padding:20px;
+  text-align:center;
+  position:relative;
+}
+
 .home{
-position:absolute;left:10px;top:10px;
-background:white;color:#2563eb;
-padding:8px 12px;border:none;border-radius:8px;
+  position:absolute;
+  left:10px;
+  top:10px;
+  background:white;
+  color:#2563eb;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.container{
+  max-width:800px;
+  margin:20px auto;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+button.delete{
+  background:red;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -23,17 +64,10 @@ padding:8px 12px;border:none;border-radius:8px;
 
 <header>
 <a href="index.html"><button class="home">🏠 Home</button></a>
-<h2 style="text-align:center;">Owner Dashboard</h2>
+<h2>Appointments</h2>
 </header>
 
-<div class="container">
-
-<input type="date" id="filter" onchange="render()">
-<input id="search" placeholder="Search">
-
-<div id="list"></div>
-
-</div>
+<div class="container" id="list"></div>
 
 <script>
 const client = supabase.createClient(
@@ -44,53 +78,54 @@ const client = supabase.createClient(
 let data = [];
 
 async function load(){
-const { data: res } = await client.from("appointments").select("*");
-data = res || [];
-render();
+  const { data: res } = await client
+    .from("appointments")
+    .select("*")
+    .order("date", { ascending:true })
+    .order("time", { ascending:true });
+
+  data = res || [];
+  render();
 }
 
 function render(){
 
-let filtered = data;
+  const list = document.getElementById("list");
+  list.innerHTML = "";
 
-const q = search.value.toLowerCase();
-const d = filter.value;
+  if(data.length === 0){
+    list.innerHTML = "<p>No appointments yet.</p>";
+    return;
+  }
 
-if(q){
-filtered = filtered.filter(a =>
-a.name.toLowerCase().includes(q) ||
-a.email.toLowerCase().includes(q)
-);
+  data.forEach(a => {
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <b>${a.name}</b><br>
+      ${a.email}<br>
+      ${a.date} ${a.time}<br><br>
+      <button class="delete">Delete</button>
+    `;
+
+    div.querySelector("button").onclick = async () => {
+      await client.from("appointments").delete().eq("id", a.id);
+      load();
+    };
+
+    list.appendChild(div);
+  });
 }
 
-if(d){
-filtered = filtered.filter(a => a.date === d);
-}
-
-list.innerHTML = "";
-
-filtered.forEach(a => {
-const div = document.createElement("div");
-div.className="card";
-
-div.innerHTML=`
-<b>${a.name}</b><br>
-${a.email}<br>
-${a.date} ${a.time}<br><br>
-<button>Delete</button>
-`;
-
-div.querySelector("button").onclick = async () => {
-await client.from("appointments").delete().eq("id", a.id);
-load();
-};
-
-list.appendChild(div);
-});
-}
-
+// realtime updates
 client.channel("live")
-.on("postgres_changes",{event:"*"},load)
+.on("postgres_changes", {
+  event:"*",
+  schema:"public",
+  table:"appointments"
+}, load)
 .subscribe();
 
 load();
