@@ -1,99 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Imaginary Clinic</title>
-
+<title>Clinic Portal</title>
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
-}
-
-body{
-  background:#f4f7fb;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-}
-
-.portal-card{
-  background:white;
-  width:100%;
-  max-width:500px;
-  padding:40px;
-  border-radius:16px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.08);
-  text-align:center;
-}
-
-h1{
-  color:#2563eb;
-  margin-bottom:10px;
-}
-
-p{
-  color:#666;
-  margin-bottom:30px;
-}
-
-.choices{
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-}
-
-.portal-btn{
-  text-decoration:none;
-  padding:15px;
-  border-radius:10px;
-  font-weight:bold;
-  transition:0.2s;
-}
-
-.portal-btn:hover{
-  transform:translateY(-2px);
-}
-
-.patient-link{
-  background:#2563eb;
-  color:white;
-}
-
-.patient-link:hover{
-  background:#1e40af;
-}
-
-.owner-link{
-  background:#e5e7eb;
-  color:#374151;
-}
-
-.owner-link:hover{
-  background:#d1d5db;
-}
+body{font-family:Arial;background:#f4f7fb;text-align:center;padding-top:100px;}
+.card{background:white;display:inline-block;padding:30px;border-radius:12px;}
+a button{padding:15px;margin:10px;width:200px;border:none;border-radius:8px;cursor:pointer;}
+.blue{background:#2563eb;color:white;}
+.gray{background:#e5e7eb;}
 </style>
 </head>
 <body>
 
-<div class="portal-card">
-  <h1>Imaginary Clinic</h1>
-  <p>Select your portal</p>
+<div class="card">
+<h1>Imaginary Clinic</h1>
+<p>Select Portal</p>
 
-  <div class="choices">
-    <a href="user.html" class="portal-btn patient-link">
-      Patient Booking Portal
-    </a>
+<a href="user.html"><button class="blue">Patient Booking</button></a>
+<a href="owner.html"><button class="gray">Owner Dashboard</button></a>
 
-    <a href="owner.html" class="portal-btn owner-link">
-      Owner Dashboard
-    </a>
-  </div>
 </div>
 
 </body>
