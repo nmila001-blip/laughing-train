@@ -6,9 +6,14 @@
 
 <title>Book Appointment</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <style>
+
+*{
+  box-sizing:border-box;
+}
+
 body{
   font-family:Arial;
   background:#f4f7fb;
@@ -52,6 +57,8 @@ button{
   border:1px solid #2563eb;
   border-radius:8px;
   background:white;
+  text-align:center;
+  cursor:pointer;
 }
 
 .slot.selected{
@@ -62,6 +69,7 @@ button{
 .slot.disabled{
   background:#ccc;
   color:#666;
+  border:none;
   cursor:not-allowed;
 }
 
@@ -76,13 +84,22 @@ button{
 }
 
 .home{
+  display:block;
   background:#e5e7eb;
-  border:none;
   padding:10px;
   border-radius:8px;
   width:100%;
   margin-bottom:10px;
+  text-decoration:none;
+  color:black;
+  text-align:center;
 }
+
+#msg{
+  margin-top:15px;
+  font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -94,35 +111,51 @@ button{
 
 <div class="container">
 
-<a href="index.html"><button class="home">🏠 Home</button></a>
+<a href="index.html" class="home">
+🏠 Home
+</a>
 
 <input id="name" placeholder="Name">
-<input id="email" placeholder="Email">
+
+<input
+  id="email"
+  type="email"
+  placeholder="Email"
+>
 
 <input type="date" id="date">
 
 <h3>Select Time Slot</h3>
+
 <div class="slot-grid" id="slots"></div>
 
-<button class="submit" onclick="book()">Book Appointment</button>
+<button class="submit" onclick="book()">
+Book Appointment
+</button>
 
 <p id="msg"></p>
 
 </div>
 
 <script>
+
 const client = supabase.createClient(
-"https://fsbpbnurfbubflszjmas.supabase.co",
-"sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
+  "https://fsbpbnurfbubflszjmas.supabase.co",
+  "YOUR_SUPABASE_ANON_KEY"
 );
+
+const msg =
+  document.getElementById("msg");
 
 let selectedTime = "";
 
-// prevent past dates
-document.getElementById("date").min =
-new Date().toISOString().split("T")[0];
+/* ---------------- DATE LIMIT ---------------- */
 
-// 30 min slots
+document.getElementById("date").min =
+  new Date().toISOString().split("T")[0];
+
+/* ---------------- TIME SLOTS ---------------- */
+
 const times = [
 "09:00","09:30",
 "10:00","10:30",
@@ -135,48 +168,130 @@ const times = [
 "17:00","17:30"
 ];
 
-function renderSlots(){
-  const container = document.getElementById("slots");
+/* ---------------- RENDER SLOTS ---------------- */
+
+async function renderSlots(){
+
+  const container =
+    document.getElementById("slots");
+
   container.innerHTML = "";
 
+  const date =
+    document.getElementById("date").value;
+
+  let booked = [];
+
+  if(date){
+
+    const { data } =
+      await client
+        .from("appointments")
+        .select("time")
+        .eq("date", date);
+
+    booked =
+      data ? data.map(x => x.time) : [];
+  }
+
   times.forEach(t => {
-    const btn = document.createElement("div");
+
+    const btn =
+      document.createElement("div");
+
     btn.className = "slot";
+
     btn.innerText = t;
 
-    btn.onclick = () => {
-      selectedTime = t;
+    if(booked.includes(t)){
 
-      document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-      btn.classList.add("selected");
-    };
+      btn.classList.add("disabled");
+
+    } else {
+
+      btn.onclick = () => {
+
+        selectedTime = t;
+
+        document
+          .querySelectorAll(".slot")
+          .forEach(s =>
+            s.classList.remove("selected")
+          );
+
+        btn.classList.add("selected");
+      };
+    }
 
     container.appendChild(btn);
   });
 }
 
-renderSlots();
+/* ---------------- DATE CHANGE ---------------- */
+
+document
+  .getElementById("date")
+  .addEventListener("change", renderSlots);
+
+/* ---------------- BOOK ---------------- */
 
 async function book(){
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const date = document.getElementById("date").value;
+  const name =
+    document.getElementById("name")
+    .value
+    .trim();
+
+  const email =
+    document.getElementById("email")
+    .value
+    .trim();
+
+  const date =
+    document.getElementById("date")
+    .value;
 
   if(!name || !email || !date || !selectedTime){
-    msg.innerText = "Fill all fields + select time";
+
+    msg.innerText =
+      "Fill all fields + select time";
+
     return;
   }
 
-  const { error } = await client.from("appointments").insert([{
-    name,
-    email,
-    date,
-    time: selectedTime
-  }]);
+  const { error } =
+    await client
+      .from("appointments")
+      .insert([{
+        name,
+        email,
+        date,
+        time:selectedTime
+      }]);
 
-  msg.innerText = error ? error.message : "Booked!";
+  if(error){
+
+    msg.innerText = error.message;
+
+    return;
+  }
+
+  msg.innerText =
+    "Appointment booked!";
+
+  document.getElementById("name").value = "";
+
+  document.getElementById("email").value = "";
+
+  selectedTime = "";
+
+  renderSlots();
 }
+
+/* ---------------- INIT ---------------- */
+
+renderSlots();
+
 </script>
 
 </body>
