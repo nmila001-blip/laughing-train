@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Owner Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <style>
+
+*{
+  box-sizing:border-box;
+}
+
 body{
   font-family:Arial;
   margin:0;
@@ -25,6 +30,7 @@ header{
 .container{
   max-width:800px;
   margin:20px auto;
+  padding:15px;
 }
 
 .card{
@@ -52,12 +58,14 @@ button{
   background:#2563eb;
   color:white;
   width:100%;
+  margin-top:10px;
 }
 
 .delete{
   background:#ef4444;
   color:white;
 }
+
 </style>
 </head>
 
@@ -65,46 +73,87 @@ button{
 
 <header>
   <h2>Owner Dashboard</h2>
-  <a href="index.html" style="color:white;">Home</a>
+
+  <a href="index.html" style="color:white;">
+    Home
+  </a>
 </header>
 
 <!-- LOGIN -->
+
 <div id="loginBox" class="container">
+
   <h3>Login</h3>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button class="primary" onclick="login()">Login</button>
+
+  <input
+    id="email"
+    type="email"
+    placeholder="Email"
+  >
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+  >
+
+  <button class="primary" onclick="login()">
+    Login
+  </button>
+
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="container" style="display:none;">
+
+<div
+  id="dashboard"
+  class="container"
+  style="display:none;"
+>
+
   <h3>Appointments</h3>
+
+  <button onclick="logout()" class="primary">
+    Logout
+  </button>
+
+  <br><br>
+
   <div id="list"></div>
+
 </div>
 
 <script>
+
 const client = supabase.createClient(
   "https://fsbpbnurfbubflszjmas.supabase.co",
-  "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
+  "YOUR_SUPABASE_ANON_KEY"
 );
 
-const loginBox = document.getElementById("loginBox");
-const dashboard = document.getElementById("dashboard");
-const list = document.getElementById("list");
+const loginBox =
+  document.getElementById("loginBox");
 
-let sessionReady = false;
+const dashboard =
+  document.getElementById("dashboard");
+
+const list =
+  document.getElementById("list");
 
 /* ---------------- LOGIN ---------------- */
 
 async function login(){
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email =
+    document.getElementById("email").value;
 
-  const { data, error } = await client.auth.signInWithPassword({
-    email,
-    password
-  });
+  const password =
+    document.getElementById("password").value;
+
+  const { error } =
+    await client.auth.signInWithPassword({
+      email,
+      password
+    });
 
   if(error){
     alert(error.message);
@@ -112,27 +161,45 @@ async function login(){
   }
 
   showApp();
+
   await loadAppointments();
+}
+
+/* ---------------- LOGOUT ---------------- */
+
+async function logout(){
+
+  await client.auth.signOut();
+
+  location.reload();
 }
 
 /* ---------------- SESSION CHECK ---------------- */
 
 async function checkSession(){
 
-  const { data } = await client.auth.getSession();
+  const { data, error } =
+    await client.auth.getSession();
 
-  if(data.session){
-    showApp();
-    await loadAppointments();
+  if(error){
+    console.log(error.message);
+    return;
   }
 
-  sessionReady = true;
+  if(data.session){
+
+    showApp();
+
+    await loadAppointments();
+  }
 }
 
-/* ---------------- SHOW UI ---------------- */
+/* ---------------- SHOW APP ---------------- */
 
 function showApp(){
+
   loginBox.style.display = "none";
+
   dashboard.style.display = "block";
 }
 
@@ -140,38 +207,63 @@ function showApp(){
 
 async function loadAppointments(){
 
-  const { data, error } = await client
-    .from("appointments")
-    .select("*")
-    .order("date", { ascending:true })
-    .order("time", { ascending:true });
+  const { data, error } =
+    await client
+      .from("appointments")
+      .select("*")
+      .order("date", { ascending:true })
+      .order("time", { ascending:true });
 
   if(error){
+
     console.log(error.message);
+
+    alert(error.message);
+
     return;
   }
 
   list.innerHTML = "";
 
   if(!data || data.length === 0){
-    list.innerHTML = "<p>No appointments yet.</p>";
+
+    list.innerHTML =
+      "<p>No appointments yet.</p>";
+
     return;
   }
 
   data.forEach(a => {
 
-    const div = document.createElement("div");
+    const div =
+      document.createElement("div");
+
     div.className = "card";
 
     div.innerHTML = `
       <b>${a.name}</b><br>
       ${a.email}<br>
       ${a.date} ${a.time}<br><br>
-      <button class="delete">Delete</button>
+
+      <button class="delete">
+        Delete
+      </button>
     `;
 
-    div.querySelector(".delete").onclick = async () => {
-      await client.from("appointments").delete().eq("id", a.id);
+    div.querySelector(".delete").onclick =
+      async () => {
+
+      const { error } =
+        await client
+          .from("appointments")
+          .delete()
+          .eq("id", a.id);
+
+      if(error){
+        alert(error.message);
+        return;
+      }
+
       loadAppointments();
     };
 
@@ -182,6 +274,7 @@ async function loadAppointments(){
 /* ---------------- INIT ---------------- */
 
 checkSession();
+
 </script>
 
 </body>
