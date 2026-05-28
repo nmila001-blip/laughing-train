@@ -206,7 +206,13 @@ function showApp(){
 /* ---------------- LOAD APPOINTMENTS ---------------- */
 
 async function loadAppointments(){
+div.innerHTML = `
+  <b>${a.name}</b><br>
+  ${a.email}<br>
+  ${a.date} ${a.time.slice(0,5)}<br><br>
 
+  <button class="delete">Delete</button>
+`;
   const { data, error } =
     await client
       .from("appointments")
