@@ -205,14 +205,10 @@ function showApp(){
 
 /* ---------------- LOAD APPOINTMENTS ---------------- */
 
-async function loadAppointments(){
-div.innerHTML = `
-  <b>${a.name}</b><br>
-  ${a.email}<br>
-  ${a.date} ${a.time.slice(0,5)}<br><br>
+/* ---------------- LOAD APPOINTMENTS ---------------- */
 
-  <button class="delete">Delete</button>
-`;
+async function loadAppointments(){
+
   const { data, error } =
     await client
       .from("appointments")
@@ -249,7 +245,7 @@ div.innerHTML = `
     div.innerHTML = `
       <b>${a.name}</b><br>
       ${a.email}<br>
-      ${a.date} ${a.time}<br><br>
+      ${a.date} ${a.time.slice(0,5)}<br><br>
 
       <button class="delete">
         Delete
@@ -259,19 +255,19 @@ div.innerHTML = `
     div.querySelector(".delete").onclick =
       async () => {
 
-      const { error } =
-        await client
-          .from("appointments")
-          .delete()
-          .eq("id", a.id);
+        const { error } =
+          await client
+            .from("appointments")
+            .delete()
+            .eq("id", a.id);
 
-      if(error){
-        alert(error.message);
-        return;
-      }
+        if(error){
+          alert(error.message);
+          return;
+        }
 
-      loadAppointments();
-    };
+        loadAppointments();
+      };
 
     list.appendChild(div);
   });
