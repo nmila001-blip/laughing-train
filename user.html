@@ -1,178 +1,440 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Session - JAMES PHOTOGRAPHY</title>
-    <!-- Standard standalone distribution cdn build mirror -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: #0b0b0b; color: #ffffff; margin: 0; }
-        header { background: #161616; color: white; text-align: center; padding: 25px; border-bottom: 1px solid #2c2c2c; letter-spacing: 2px; }
-        h2 { margin: 0; font-size: 22px; }
-        .container { max-width: 650px; margin: 30px auto; background: #161616; padding: 25px; border-radius: 12px; border: 1px solid #2c2c2c; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #222222; border: 1px solid #444444; color: white; border-radius: 6px; }
-        input:focus { outline: none; border-color: #ffffff; }
-        .home { display: inline-block; background: #222222; padding: 8px 16px; border-radius: 6px; text-decoration: none; color: #aaaaaa; margin-bottom: 20px; font-size: 14px; border: 1px solid #333333; }
-        .home:hover { color: #ffffff; background: #333333; }
-        h3 { margin-top: 25px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #aaaaaa; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-weight: bold; }
-        .cal-header button { background: #ffffff; color: black; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .cal-header button:hover { background: #cccccc; }
-        #monthLabel { font-size: 16px; color: #ffffff; font-weight: bold; }
-        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; min-height: 100px; }
-        .day { padding: 12px; border: 1px solid #333333; border-radius: 8px; text-align: center; cursor: pointer; background: #222222; color: #ffffff !important; font-weight: bold; }
-        .day:hover:not(.disabled):not(.empty) { border-color: #ffffff; background: #333333; }
-        .day.selected { background: #ffffff !important; color: #000000 !important; font-weight: bold; }
-        .day.disabled { background: #111111; color: #555555 !important; cursor: not-allowed; border: 1px solid #1a1a1a; }
-        .day.empty { border: none; background: transparent; }
-        .slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .slot { padding: 12px; border: 1px solid #444444; border-radius: 8px; text-align: center; cursor: pointer; background: #222222; color: #ffffff; }
-        .slot:hover:not(.disabled) { border-color: #ffffff; }
-        .slot.selected { background: #ffffff; color: black; font-weight: bold; border-color: #ffffff; }
-        .slot.disabled { background: #111111; color: #555555; border-color: #222222; cursor: not-allowed; }
-        .submit { width: 100%; padding: 15px; margin-top: 25px; background: #ffffff; color: black; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .submit:hover { background: #cccccc; }
-        #msg { margin-top: 15px; font-weight: bold; text-align: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Session - JAMES PHOTOGRAPHY</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#0b0b0b;
+    color:#fff;
+    padding:20px;
+}
+
+header{
+    text-align:center;
+    padding:25px;
+    margin-bottom:20px;
+}
+
+header h1{
+    letter-spacing:2px;
+    font-size:28px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    background:#161616;
+    border:1px solid #2c2c2c;
+    border-radius:12px;
+    padding:25px;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+
+.home{
+    display:inline-block;
+    margin-bottom:20px;
+    color:#aaa;
+    text-decoration:none;
+}
+
+.home:hover{
+    color:#fff;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+    border-radius:8px;
+    border:1px solid #444;
+    background:#222;
+    color:white;
+}
+
+input:focus{
+    outline:none;
+    border-color:white;
+}
+
+h3{
+    margin:20px 0 10px;
+    color:#aaa;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-size:14px;
+}
+
+.cal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.cal-header button{
+    background:white;
+    color:black;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+#calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+}
+
+.day{
+    background:#222;
+    border:1px solid #333;
+    padding:12px;
+    border-radius:8px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.day:hover:not(.disabled):not(.empty){
+    border-color:white;
+}
+
+.day.selected{
+    background:white;
+    color:black;
+}
+
+.day.disabled{
+    background:#111;
+    color:#555;
+    cursor:not-allowed;
+}
+
+.day.empty{
+    background:transparent;
+    border:none;
+}
+
+.slot-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.slot{
+    background:#222;
+    border:1px solid #444;
+    padding:12px;
+    border-radius:8px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.slot:hover:not(.disabled){
+    border-color:white;
+}
+
+.slot.selected{
+    background:white;
+    color:black;
+    font-weight:bold;
+}
+
+.slot.disabled{
+    background:#111;
+    color:#555;
+    cursor:not-allowed;
+}
+
+.submit{
+    width:100%;
+    margin-top:25px;
+    padding:15px;
+    border:none;
+    border-radius:8px;
+    background:white;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.submit:hover{
+    background:#ddd;
+}
+
+#msg{
+    margin-top:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+@media(max-width:600px){
+    .slot-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+</style>
 </head>
 <body>
-    <header><h2>JAMES PHOTOGRAPHY</h2></header>
-    <div class="container">
-        <a href="index.html" class="home">← Back to Home</a>
-        <input id="name" placeholder="Full Name" autocomplete="name" name="name">
-        <input id="email" type="email" placeholder="Email Address" autocomplete="email" name="email">
-        <input id="car" placeholder="Vehicle Details (Year, Make, Model)" autocomplete="off" name="car_details">
-        
-        <h3>Select Date</h3>
-        <div class="cal-header">
-            <button type="button" onclick="prevMonth()">◀</button>
-            <div id="monthLabel">Loading Month...</div>
-            <button type="button" onclick="nextMonth()">▶</button>
-        </div>
-        <div id="calendar"></div>
-        
-        <h3>Select Available Time Slot</h3>
-        <div class="slot-grid" id="slots"></div>
-        
-        <button class="submit" onclick="book()">Request 2-Hour Session ($100)</button>
-        <p id="msg"></p>
+
+<header>
+    <h1>JAMES PHOTOGRAPHY</h1>
+</header>
+
+<div class="container">
+
+    <a href="index.html" class="home">← Back to Home</a>
+
+    <input id="name" type="text" placeholder="Full Name">
+    <input id="email" type="email" placeholder="Email Address">
+    <input id="car" type="text" placeholder="Vehicle Details (Year, Make, Model)">
+
+    <h3>Select Date</h3>
+
+    <div class="cal-header">
+        <button onclick="prevMonth()">◀</button>
+        <div id="monthLabel"></div>
+        <button onclick="nextMonth()">▶</button>
     </div>
-    <script>
-        const times = ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
-        let selectedDate = "";
-        let selectedTime = "";
-        let currentDate = new Date();
-        let client = null;
-        const EMAIL_WEBHOOK_URL = "";
 
-        try {
-            // Capitalized the SDK object prefix handle to prevent global execution crash faults
-            if (typeof Supabase !== 'undefined') {
-                client = Supabase.createClient("https://fsbpbnurfbubflszjmas.supabase.co", "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L");
-            } else if (typeof supabase !== 'undefined') {
-                client = supabase.createClient("https://fsbpbnurfbubflszjmas.supabase.co", "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L");
-            }
-        } catch(e) {
-            console.error("Initialization fault:", e.message);
-        }
-        
-        function to12Hour(t){
-            let [h, m] = t.split(":");
-            h = parseInt(h);
-            const ampm = h >= 12 ? "PM" : "AM";
-            h = h % 12 || 12;
-            return `${h}:${m} ${ampm}`;
-        }
-        
-        async function getAppointments(){
-            if (!client) return [];
-            try {
-                const { data, error } = await client.from("appointments").select("date,time");
-                if (error) {
-                    console.warn("Table connection warning, running grid package fallback arrays:", error.message);
-                    return [];
-                }
-                return data || [];
-            } catch (err) { 
-                return []; 
-            }
-        }
-        
-        async function renderCalendar(){
-            const calendar = document.getElementById("calendar");
-            const label = document.getElementById("monthLabel");
-            if(!calendar || !label) return;
-            
-            calendar.innerHTML = "";
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            label.innerText = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
-            
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            const all = await getAppointments();
-            
-            for(let i = 0; i < firstDay; i++){
-                const e = document.createElement("div"); e.className = "day empty"; calendar.appendChild(e);
-            }
-            for(let d = 1; d <= daysInMonth; d++){
-                const targetDate = new Date(year, month, d);
-                const dayOfWeek = targetDate.getDay(); 
-                const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-                const div = document.createElement("div");
-                div.className = "day"; div.innerText = d;
-                const today = new Date(); today.setHours(0,0,0,0);
-                if (targetDate < today || dayOfWeek === 0 || dayOfWeek === 4) {
-                    div.classList.add("disabled");
-                } else {
-                    div.onclick = () => {
-                        selectedDate = dateStr; selectedTime = "";
-                        document.querySelectorAll(".day").forEach(x => x.classList.remove("selected"));
-                        div.classList.add("selected"); renderSlots(all);
-                    };
-                }
-                calendar.appendChild(div);
-            }
+    <div id="calendar"></div>
+
+    <h3>Select Time</h3>
+    <div class="slot-grid" id="slots"></div>
+
+    <button class="submit" onclick="book()">
+        Request 2-Hour Session ($100)
+    </button>
+
+    <div id="msg"></div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://fsbpbnurfbubflszjmas.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L";
+
+const client = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const TIMES = [
+    "12:00","12:30","13:00","13:30",
+    "14:00","14:30","15:00","15:30",
+    "16:00","16:30","17:00","17:30"
+];
+
+let selectedDate = "";
+let selectedTime = "";
+let currentDate = new Date();
+
+function formatTime(time){
+    let [h,m] = time.split(":");
+    h = parseInt(h);
+
+    const suffix = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+
+    return `${h}:${m} ${suffix}`;
+}
+
+async function getAppointments(){
+    const { data, error } = await client
+        .from("appointments")
+        .select("date,time");
+
+    if(error){
+        console.error(error);
+        return [];
+    }
+
+    return data || [];
+}
+
+async function renderCalendar(){
+
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    document.getElementById("monthLabel").textContent =
+        currentDate.toLocaleString("default", {
+            month:"long",
+            year:"numeric"
+        });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const appointments = await getAppointments();
+
+    for(let i=0;i<firstDay;i++){
+        const empty = document.createElement("div");
+        empty.className = "day empty";
+        calendar.appendChild(empty);
+    }
+
+    for(let day=1;day<=daysInMonth;day++){
+
+        const date = new Date(year, month, day);
+        const dateString =
+            `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+        const cell = document.createElement("div");
+        cell.className = "day";
+        cell.textContent = day;
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        if(date < today){
+            cell.classList.add("disabled");
+        }else{
+            cell.onclick = () => {
+
+                document.querySelectorAll(".day")
+                    .forEach(d => d.classList.remove("selected"));
+
+                cell.classList.add("selected");
+
+                selectedDate = dateString;
+                selectedTime = "";
+
+                renderSlots(appointments);
+            };
         }
 
-        function renderSlots(all){
-            const container = document.getElementById("slots");
-            if(!container) return;
-            container.innerHTML = "";
-            if(!selectedDate) return;
-            const bookedTimes = all.filter(x => x.date === selectedDate).map(x => {
-                const [h, m] = x.time.split(":"); return parseInt(h) * 60 + parseInt(m);
-            });
-            times.forEach(t => {
-                const div = document.createElement("div"); div.className = "slot"; div.innerText = to12Hour(t);
-                const [h, m] = t.split(":"); const currentSlotMinutes = parseInt(h) * 60 + parseInt(m);
-                let isBlocked = false;
-                bookedTimes.forEach(bookedMinutes => {
-                    const timeDifference = Math.abs(currentSlotMinutes - bookedMinutes);
-                    if (timeDifference < 120) { isBlocked = true; } // Rolling 2-hour duration conflict checks
-                });
-                if(isBlocked){ div.classList.add("disabled"); } else {
-                    div.onclick = () => {
-                        selectedTime = t; document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected")); div.classList.add("selected");
-                    };
-                }
-                container.appendChild(div);
-            });
+        calendar.appendChild(cell);
+    }
+}
+
+function renderSlots(appointments){
+
+    const container = document.getElementById("slots");
+    container.innerHTML = "";
+
+    if(!selectedDate) return;
+
+    const booked = appointments
+        .filter(a => a.date === selectedDate)
+        .map(a => a.time);
+
+    TIMES.forEach(time => {
+
+        const slot = document.createElement("div");
+        slot.className = "slot";
+        slot.textContent = formatTime(time);
+
+        if(booked.includes(time)){
+            slot.classList.add("disabled");
+        }else{
+            slot.onclick = () => {
+
+                document.querySelectorAll(".slot")
+                    .forEach(s => s.classList.remove("selected"));
+
+                slot.classList.add("selected");
+                selectedTime = time;
+            };
         }
 
-        async function book(){
-            const name = document.getElementById("name").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const car = document.getElementById("car").value.trim();
-            const msgElement = document.getElementById("msg");
-            if(!name || !email || !car || !selectedDate || !selectedTime){
-                if(msgElement) { msgElement.style.color = "#ff4444"; msgElement.innerText = "Please complete all fields."; }
-                return;
+        container.appendChild(slot);
+    });
+}
+
+async function book(){
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const car = document.getElementById("car").value.trim();
+    const msg = document.getElementById("msg");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!name || !email || !car || !selectedDate || !selectedTime){
+        msg.style.color = "#ff4444";
+        msg.textContent = "Please complete all fields.";
+        return;
+    }
+
+    if(!emailRegex.test(email)){
+        msg.style.color = "#ff4444";
+        msg.textContent = "Enter a valid email address.";
+        return;
+    }
+
+    const { error } = await client
+        .from("appointments")
+        .insert([
+            {
+                name,
+                email,
+                car_details: car,
+                date: selectedDate,
+                time: selectedTime
             }
-            if(!client) {
-                if(msgElement) { msgElement.style.color = "#ff4444"; msgElement.innerText = "Database connection offline."; }
-//Use code with caution
-                return;}const { error } = await client.from("appointments").insert([{ name, email, car_details: car, date: selectedDate, time: selectedTime }]);if(error){if(msgElement) { msgElement.style.color = "#ff4444"; msgElement.innerText = error.message; }return;}if (EMAIL_WEBHOOK_URL) {try {await fetch(EMAIL_WEBHOOK_URL, {method: "POST",headers: { "Content-Type": "application/json" },body: JSON.stringify({owner_email: "nmila001@doral.colegia.org",client_name: name, client_email: email, car_details: car, booking_date: selectedDate, booking_time: to12Hour(selectedTime)})});} catch (webhookError) {console.error("Webhook processing error:", webhookError.message);}}if(msgElement) { msgElement.style.color = "#44ff44"; msgElement.innerText = "Booking request submitted successfully!"; }selectedTime = "";document.getElementById("name").value = "";document.getElementById("email").value = "";document.getElementById("car").value = "";renderCalendar();}function nextMonth(){ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }function prevMonth(){ currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); }renderCalendar();
+        ]);
+
+    if(error){
+        msg.style.color = "#ff4444";
+        msg.textContent = error.message;
+        return;
+    }
+
+    msg.style.color = "#44ff44";
+    msg.textContent = "Booking request submitted successfully.";
+
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("car").value = "";
+
+    selectedDate = "";
+    selectedTime = "";
+
+    await renderCalendar();
+    document.getElementById("slots").innerHTML = "";
+}
+
+function nextMonth(){
+    currentDate.setMonth(currentDate.getMonth()+1);
+    renderCalendar();
+}
+
+function prevMonth(){
+
+    const today = new Date();
+
+    if(
+        currentDate.getMonth() === today.getMonth() &&
+        currentDate.getFullYear() === today.getFullYear()
+    ){
+        return;
+    }
+
+    currentDate.setMonth(currentDate.getMonth()-1);
+    renderCalendar();
+}
+
+renderCalendar();
+</script>
+
+</body>
+</html>
+```
