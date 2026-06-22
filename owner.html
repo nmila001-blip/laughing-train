@@ -1,283 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Owner Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-<style>
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  font-family:Arial;
-  margin:0;
-  background:#f4f7fb;
-}
-
-header{
-  background:#2563eb;
-  color:white;
-  padding:20px;
-  text-align:center;
-}
-
-.container{
-  max-width:800px;
-  margin:20px auto;
-  padding:15px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.08);
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-}
-
-button{
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.primary{
-  background:#2563eb;
-  color:white;
-  width:100%;
-  margin-top:10px;
-}
-
-.delete{
-  background:#ef4444;
-  color:white;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - JAMES PHOTOGRAPHY</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0b0b0b;
+            color: #ffffff;
+            margin: 0;
+        }
+        header {
+            background: #161616;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #2c2c2c;
+            letter-spacing: 2px;
+            position: relative;
+        }
+        h2 { margin: 0; font-size: 22px; }
+        .home-link {
+            position: absolute;
+            right: 25px;
+            top: 28px;
+            color: #aaaaaa;
+            text-decoration: none;
+            font-size: 14px;
+            border: 1px solid #333333;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: #222222;
+        }
+        .home-link:hover { color: #ffffff; background: #333333; }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 15px;
+        }
+        .card {
+            background: #161616;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 1px solid #2c2c2c;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .card b {
+            font-size: 18px;
+            color: #ffffff;
+        }
+        .car-highlight {
+            background: #222222;
+            border-left: 3px solid #ffffff;
+            padding: 10px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            color: #e5e7eb;
+        }
+        .details-text {
+            color: #aaaaaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+            border-radius: 6px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ffffff;
+        }
+        h3 {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaaaaa;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .primary {
+            background: #ffffff;
+            color: black;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .primary:hover { background: #cccccc; }
+        .logout-btn {
+            background: #222222;
+            color: #ff4444;
+            border: 1px solid #333333;
+            width: auto;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+        }
+        .logout-btn:hover { background: #333333; }
+        .delete {
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            margin-top: 5px;
+        }
+        .delete:hover { background: #dc2626; }
+    </style>
 </head>
-
 <body>
 
-<header>
-  <h2>Owner Dashboard</h2>
+    <header>
+        <h2>Owner Dashboard</h2>
+        <a href="index.html" class="home-link">🏠 Home</a>
+    </header>
 
-  <a href="index.html" style="color:white;">
-🏠 Home
-  </a>
-</header>
+    <!-- LOGIN -->
+    <div id="loginBox" class="container" style="max-width: 400px;">
+        <div class="card">
+            <h3>Staff Login</h3>
+            <input id="email" type="email" placeholder="Email Address">
+            <input id="password" type="password" placeholder="Password">
+            <button class="primary" onclick="login()">Login</button>
+        </div>
+    </div>
 
-<!-- LOGIN -->
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="container" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Session Requests</h3>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+        <div id="list"></div>
+    </div>
 
-<div id="loginBox" class="container">
+    <script>
+        const client = supabase.createClient(
+            "https://fsbpbnurfbubflszjmas.supabase.co",
+            "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
+        );
 
-  <h3>Login</h3>
+        const loginBox = document.getElementById("loginBox");
+        const dashboard = document.getElementById("dashboard");
+        const list = document.getElementById("list");
 
-  <input
-    id="email"
-    type="email"
-    placeholder="Email"
-  >
-
-  <input
-    id="password"
-    type="password"
-    placeholder="Password"
-  >
-
-  <button class="primary" onclick="login()">
-    Login
-  </button>
-
-</div>
-
-<!-- DASHBOARD -->
-
-<div
-  id="dashboard"
-  class="container"
-  style="display:none;"
->
-
-  <h3>Appointments</h3>
-
-  <button onclick="logout()" class="primary">
-    Logout
-  </button>
-
-  <br><br>
-
-  <div id="list"></div>
-
-</div>
-
-<script>
-
-const client = supabase.createClient(
-  "https://fsbpbnurfbubflszjmas.supabase.co",
-  "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L"
-);
-
-const loginBox =
-  document.getElementById("loginBox");
-
-const dashboard =
-  document.getElementById("dashboard");
-
-const list =
-  document.getElementById("list");
-
-/* ---------------- LOGIN ---------------- */
-
-async function login(){
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  const { error } =
-    await client.auth.signInWithPassword({
-      email,
-      password
-    });
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  showApp();
-
-  await loadAppointments();
-}
-
-/* ---------------- LOGOUT ---------------- */
-
-async function logout(){
-
-  await client.auth.signOut();
-
-  location.reload();
-}
-
-/* ---------------- SESSION CHECK ---------------- */
-
-async function checkSession(){
-
-  const { data, error } =
-    await client.auth.getSession();
-
-  if(error){
-    console.log(error.message);
-    return;
-  }
-
-  if(data.session){
-
-    showApp();
-
-    await loadAppointments();
-  }
-}
-
-/* ---------------- SHOW APP ---------------- */
-
-function showApp(){
-
-  loginBox.style.display = "none";
-
-  dashboard.style.display = "block";
-}
-
-/* ---------------- LOAD APPOINTMENTS ---------------- */
-
-/* ---------------- LOAD APPOINTMENTS ---------------- */
-
-async function loadAppointments(){
-
-  const { data, error } =
-    await client
-      .from("appointments")
-      .select("*")
-      .order("date", { ascending:true })
-      .order("time", { ascending:true });
-
-  if(error){
-
-    console.log(error.message);
-
-    alert(error.message);
-
-    return;
-  }
-
-  list.innerHTML = "";
-
-  if(!data || data.length === 0){
-
-    list.innerHTML =
-      "<p>No appointments yet.</p>";
-
-    return;
-  }
-
-  data.forEach(a => {
-
-    const div =
-      document.createElement("div");
-
-    div.className = "card";
-
-    div.innerHTML = `
-      <b>${a.name}</b><br>
-      ${a.email}<br>
-      ${a.date} ${a.time.slice(0,5)}<br><br>
-
-      <button class="delete">
-        Delete
-      </button>
-    `;
-
-    div.querySelector(".delete").onclick =
-      async () => {
-
-        const { error } =
-          await client
-            .from("appointments")
-            .delete()
-            .eq("id", a.id);
-
-        if(error){
-          alert(error.message);
-          return;
+        /* 12-hour converter utility for dashboard display */
+        function to12Hour(t){
+            if(!t) return "";
+            let [h, m] = t.split(":");
+            h = parseInt(h);
+            const ampm = h >= 12 ? "PM" : "AM";
+            h = h % 12 || 12;
+            return `${h}:${m} ${ampm}`;
         }
 
-        loadAppointments();
-      };
+        /* ---------------- LOGIN ---------------- */
+        async function login(){
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const { error } = await client.auth.signInWithPassword({ email, password });
+            if(error){
+                alert(error.message);
+                return;
+            }
+            showApp();
+            await loadAppointments();
+        }
 
-    list.appendChild(div);
-  });
-}
+        /* ---------------- LOGOUT ---------------- */
+        async function logout(){
+            await client.auth.signOut();
+            location.reload();
+        }
 
-/* ---------------- INIT ---------------- */
+        /* ---------------- SESSION CHECK ---------------- */
+        async function checkSession(){
+            const { data, error } = await client.auth.getSession();
+            if(error){
+                console.log(error.message);
+                return;
+            }
+            if(data.session){
+                showApp();
+                await loadAppointments();
+            }
+        }
 
-checkSession();
+        /* ---------------- SHOW APP ---------------- */
+        function showApp(){
+            loginBox.style.display = "none";
+            dashboard.style.display = "block";
+        }
 
-</script>
+        /* ---------------- LOAD APPOINTMENTS ---------------- */
+        async function loadAppointments(){
+            const { data, error } = await client
+                .from("appointments")
+                .select("*")
+                .order("date", { ascending:true })
+                .order("time", { ascending:true });
 
+            if(error){
+                console.log(error.message);
+                alert(error.message);
+                return;
+            }
+            
+            list.innerHTML = "";
+            
+            if(!data || data.length === 0){
+                list.innerHTML = "<p style='color: #aaaaaa; text-align: center;'>No session appointments booked yet.</p>";
+                return;
+            }
+
+            data.forEach(a => {
+                const div = document.createElement("div");
+                div.className = "card";
+                
+                // Formats the output safely, displaying the vehicle details collected from user.html
+                div.innerHTML = `
+                    <b>${a.name}</b><br>
+                    <div class="details-text">
+                        ✉️ ${a.email}<br>
+                        📅 ${a.date} at 🕒 ${to12Hour(a.time.slice(0,5))}
+                    </div>
+                    <div class="car-highlight">
+                        <strong>Vehicle:</strong> ${a.car_details || 'No vehicle information specified'}
+                    </div>
+                    <button class="delete">Delete Booking</button>
+                `;
+
+                div.querySelector(".delete").onclick = async () => {
+                    if(confirm(`Are you sure you want to delete the booking for ${a.name}?`)) {
+                        const { error } = await client
+                            .from("appointments")
+                            .delete()
+                            .eq("id", a.id);
+                        if(error){
+                            alert(error.message);
+                            return;
+                        }
+                        loadAppointments();
+                    }
+                };
+                list.appendChild(div);
+            });
+        }
+
+        /* ---------------- INIT ---------------- */
+        checkSession();
+    </script>
 </body>
 </html>
