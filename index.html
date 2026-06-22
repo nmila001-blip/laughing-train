@@ -1,73 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>JAMES PHOTOGRAPHY</title>
-
-<style>
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  font-family:Arial;
-  background:#f4f7fb;
-  text-align:center;
-  padding-top:100px;
-  margin:0;
-}
-
-.card{
-  background:white;
-  display:inline-block;
-  padding:30px;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.08);
-}
-
-.btn{
-  display:block;
-  padding:15px;
-  margin:10px auto;
-  width:220px;
-  border-radius:8px;
-  text-decoration:none;
-  font-weight:bold;
-}
-
-.blue{
-  background:#2563eb;
-  color:white;
-}
-
-.gray{
-  background:#e5e7eb;
-  color:black;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAMES PHOTOGRAPHY</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0b0b0b; /* Changed to dark background to match your flyer */
+            color: #ffffff;
+            text-align: center;
+            padding-top: 100px;
+            margin: 0;
+        }
+        .card {
+            background: #161616; /* Dark card style */
+            display: inline-block;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid #2c2c2c;
+        }
+        h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #aaaaaa;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .btn {
+            display: block;
+            padding: 15px;
+            margin: 10px auto;
+            width: 240px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .blue {
+            background: #ffffff; /* White button for high contrast */
+            color: #000000;
+        }
+        .blue:hover {
+            background: #cccccc;
+        }
+        /* Hidden dashboard style for safety */
+        .admin-link {
+            display: block;
+            margin-top: 30px;
+            color: #444444;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        .admin-link:hover {
+            color: #888888;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<h1>Imaginary Clinic</h1>
-
-<p>Select Portal</p>
-
-<a href="user.html" class="btn blue">
-Client Booking
-</a>
-
-<a href="owner.html" class="btn gray">
-Owner Dashboard
-</a>
-
-</div>
+    <div class="card">
+        <h1>JAMES PHOTOGRAPHY</h1>
+        <p class="subtitle">Elite Wheels. Bold Edits.</p>
+        
+        <!-- Main booking button for your clients -->
+        <a href="user.html" class="btn blue">Book Your 2-Hour Session</a>
+        
+        <!-- Disguised secret link for you to access the dashboard -->
+        <a href="owner.html" class="admin-link">Staff Login</a>
+    </div>
 
 </body>
 </html>
