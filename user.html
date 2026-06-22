@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Session - JAMES PHOTOGRAPHY</title>
-    <!-- Fixed library script module reference -->
     <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; }
@@ -20,8 +19,8 @@
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-weight: bold; }
         .cal-header button { background: #ffffff; color: black; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .cal-header button:hover { background: #cccccc; }
-        #monthLabel { font-size: 16px; color: #ffffff; }
-        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+        #monthLabel { font-size: 16px; color: #ffffff; font-weight: bold; }
+        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; min-height: 100px; }
         .day { padding: 12px; border: 1px solid #333333; border-radius: 8px; text-align: center; cursor: pointer; background: #222222; color: #ffffff !important; font-weight: bold; }
         .day:hover:not(.disabled):not(.empty) { border-color: #ffffff; background: #333333; }
         .day.selected { background: #ffffff !important; color: #000000 !important; font-weight: bold; }
@@ -41,18 +40,21 @@
     <header><h2>JAMES PHOTOGRAPHY</h2></header>
     <div class="container">
         <a href="index.html" class="home">← Back to Home</a>
-        <input id="name" placeholder="Full Name">
-        <input id="email" type="email" placeholder="Email Address">
-        <input id="car" placeholder="Vehicle Details (Year, Make, Model)">
+        <input id="name" placeholder="Full Name" autocomplete="name" name="name">
+        <input id="email" type="email" placeholder="Email Address" autocomplete="email" name="email">
+        <input id="car" placeholder="Vehicle Details (Year, Make, Model)" autocomplete="off" name="car_details">
+        
         <h3>Select Date</h3>
         <div class="cal-header">
             <button type="button" onclick="prevMonth()">◀</button>
-            <div id="monthLabel"></div>
+            <div id="monthLabel">Loading Month...</div>
             <button type="button" onclick="nextMonth()">▶</button>
         </div>
         <div id="calendar"></div>
+        
         <h3>Select Available Time Slot</h3>
         <div class="slot-grid" id="slots"></div>
+        
         <button class="submit" onclick="book()">Request 2-Hour Session ($100)</button>
         <p id="msg"></p>
     </div>
@@ -62,15 +64,12 @@
         let selectedTime = "";
         let currentDate = new Date();
         let client = null;
-
-        // Paste your integration automation webhook link down inside these quotes later
         const EMAIL_WEBHOOK_URL = "";
 
         try {
-            // Restored the working instance connection address endpoint
-            client = supabase.createClient("https://fsbpbnurfbubflszjmas.supabase.co", "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L");
+            client = supabase.createClient("https://supabase.co", "sb_publishable_WAbUS1LIKOevak1NYGiaLA_OV5FiC1L");
         } catch(e) {
-            console.error("Supabase engine connection fault:", e.message);
+            console.error("Supabase failed initialization:", e.message);
         }
         
         function to12Hour(t){
@@ -86,24 +85,31 @@
             try {
                 const { data, error } = await client.from("appointments").select("date,time");
                 if (error) {
-                    console.error("Database table select error:", error.message);
+                    console.warn("Using local fallback array:", error.message);
                     return [];
                 }
                 return data || [];
-            } catch (err) { return []; }
+            } catch (err) { 
+                return []; 
+            }
         }
         
         async function renderCalendar(){
             const calendar = document.getElementById("calendar");
             const label = document.getElementById("monthLabel");
             if(!calendar || !label) return;
+            
             calendar.innerHTML = "";
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             label.innerText = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+            
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Safely await appointments or fetch fallback empty values if blocked
             const all = await getAppointments();
+            
             for(let i = 0; i < firstDay; i++){
                 const e = document.createElement("div"); e.className = "day empty"; calendar.appendChild(e);
             }
@@ -132,23 +138,17 @@
             if(!container) return;
             container.innerHTML = "";
             if(!selectedDate) return;
-
-            // Map hours on current date to raw working minutes
             const bookedTimes = all.filter(x => x.date === selectedDate).map(x => {
                 const [h, m] = x.time.split(":"); return parseInt(h) * 60 + parseInt(m);
             });
-
             times.forEach(t => {
                 const div = document.createElement("div"); div.className = "slot"; div.innerText = to12Hour(t);
                 const [h, m] = t.split(":"); const currentSlotMinutes = parseInt(h) * 60 + parseInt(m);
                 let isBlocked = false;
-
-                // 2-hour sliding collision rule logic checks for timeline block overlaps (120 minutes)
                 bookedTimes.forEach(bookedMinutes => {
                     const timeDifference = Math.abs(currentSlotMinutes - bookedMinutes);
-                    if (timeDifference < 120) { isBlocked = true; }
+                    if (timeDifference < 120) { isBlocked = true; } // Rolling 2-hour blocking rule
                 });
-
                 if(isBlocked){ div.classList.add("disabled"); } else {
                     div.onclick = () => {
                         selectedTime = t; document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected")); div.classList.add("selected");
@@ -176,5 +176,5 @@
                 if(msgElement) { msgElement.style.color = "#ff4444"; msgElement.innerText = error.message; }
                 return;
             }
-
-// Automate out background emails parameters package payloadsif (EMAIL_WEBHOOK_URL) {try {await fetch(EMAIL_WEBHOOK_URL, {method: "POST",headers: { "Content-Type": "application/json" },body: JSON.stringify({owner_email: "nmila001@doral.colegia.org",client_name: name,client_email: email,car_details: car,booking_date: selectedDate,booking_time: to12Hour(selectedTime)})});} catch (webhookError) {console.error("Webhook route alert skipped:", webhookError.message);}}if(msgElement) { msgElement.style.color = "#44ff44"; msgElement.innerText = "Booking request submitted successfully!"; }selectedTime = "";document.getElementById("name").value = "";document.getElementById("email").value = "";document.getElementById("car").value = "";renderCalendar();}function nextMonth(){ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }function prevMonth(){ currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); }renderCalendar();
+            if (EMAIL_WEBHOOK_URL) {
+try {await fetch(EMAIL_WEBHOOK_URL, {method: "POST",headers: { "Content-Type": "application/json" },body: JSON.stringify({owner_email: "nmila001@doral.colegia.org",client_name: name, client_email: email, car_details: car, booking_date: selectedDate, booking_time: to12Hour(selectedTime)})});} catch (webhookError) {console.error("Webhook deferred:", webhookError.message);}}if(msgElement) { msgElement.style.color = "#44ff44"; msgElement.innerText = "Booking request submitted successfully!"; }selectedTime = "";document.getElementById("name").value = "";document.getElementById("email").value = "";document.getElementById("car").value = "";renderCalendar();}function nextMonth(){ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }function prevMonth(){ currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); }// Direct initial runtime render callrenderCalendar();
